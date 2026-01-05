@@ -1,6 +1,7 @@
 package ovo.sypw.androidendproject.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,17 +15,34 @@ import ovo.sypw.androidendproject.ui.screens.map.MapScreen
 import ovo.sypw.androidendproject.ui.screens.news.NewsDetailScreen
 import ovo.sypw.androidendproject.ui.screens.splash.SplashScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoDetailScreen
+import ovo.sypw.androidendproject.utils.PreferenceUtils
 import java.net.URLDecoder
 
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
+    val context = LocalContext.current
+    
+    // 根据广告偏好决定起始页面
+    // 如果启用 Google 广告，则跳过 SplashScreen（Google Ad 会由 AppOpenAdManager 显示）
+    val startDestination = if (PreferenceUtils.useGoogleAd(context)) {
+        // 使用 Google 广告时，根据是否首次启动决定起始页
+        if (PreferenceUtils.isFirstLaunch(context)) {
+            Screen.Intro.route
+        } else {
+            Screen.Main.route
+        }
+    } else {
+        // 使用自定义启动屏
+        Screen.Splash.route
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route
+        startDestination = startDestination
     ) {
-        // 启动页
+        // 启动页（仅在使用自定义启动屏时显示）
         composable(Screen.Splash.route) {
             SplashScreen(
                 onNavigateToIntro = {
@@ -102,6 +120,16 @@ fun AppNavigation(
         composable(Screen.Python.route) {
             ovo.sypw.androidendproject.ui.screens.python.PythonScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        // 设置页
+        composable(Screen.Settings.route) {
+            ovo.sypw.androidendproject.ui.screens.settings.SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onDebugUrlOpen = { url ->
+                    navController.navigate(Screen.NewsDetail.createRoute(url, "调试"))
+                }
             )
         }
     }

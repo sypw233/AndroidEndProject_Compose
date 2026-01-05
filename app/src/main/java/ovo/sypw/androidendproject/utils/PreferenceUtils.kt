@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 object PreferenceUtils {
     private const val PREF_NAME = "app_preferences"
     private const val KEY_FIRST_LAUNCH = "first_launch"
+    private const val KEY_USE_GOOGLE_AD = "use_google_ad"
 
     private fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -17,6 +18,19 @@ object PreferenceUtils {
 
     fun setFirstLaunch(context: Context, isFirst: Boolean) {
         getPreferences(context).edit().putBoolean(KEY_FIRST_LAUNCH, isFirst).apply()
+    }
+
+    /**
+     * 是否使用 Google AdMob 开屏广告
+     * true = Google AdMob 开屏广告
+     * false = 自定义启动屏（图片/视频）
+     */
+    fun useGoogleAd(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_USE_GOOGLE_AD, false)
+    }
+
+    fun setUseGoogleAd(context: Context, useGoogle: Boolean) {
+        getPreferences(context).edit().putBoolean(KEY_USE_GOOGLE_AD, useGoogle).apply()
     }
 
     fun getString(context: Context, key: String, defaultValue: String = ""): String {
@@ -39,3 +53,4 @@ object PreferenceUtils {
         getPreferences(context).edit().clear().apply()
     }
 }
+

@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.List
@@ -64,7 +65,8 @@ fun SpeedDialFab(
     )
 
     val items = listOf(
-        SpeedDialItem(ChartType.LINE, "折线图", Icons.Default.ShowChart, Color(0xFF42A5F5)),
+        SpeedDialItem(ChartType.LINE, "折线图",
+            Icons.AutoMirrored.Filled.ShowChart, Color(0xFF42A5F5)),
         SpeedDialItem(ChartType.BAR, "柱状图", Icons.Default.BarChart, Color(0xFF66BB6A)),
         SpeedDialItem(ChartType.PIE, "饼图", Icons.Default.PieChart, Color(0xFFFFA726))
     )

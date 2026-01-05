@@ -112,9 +112,7 @@ fun MainScreen(navController: NavHostController) {
                 MeScreen(
                     onLoginClick = { navController.navigate(Screen.Login.route) },
                     onMapClick = { navController.navigate(Screen.Map.route) },
-                    onDebugUrlClick = { url ->
-                        navController.navigate(Screen.NewsDetail.createRoute(url, "调试"))
-                    }
+                    onSettingsClick = { navController.navigate(Screen.Settings.route) }
                 )
             }
         }

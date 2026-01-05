@@ -41,6 +41,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import kotlinx.coroutines.delay
 import ovo.sypw.androidendproject.utils.PreferenceUtils
+import androidx.core.net.toUri
 
 enum class AdType {
     IMAGE, VIDEO
@@ -162,7 +163,7 @@ fun SplashVideoPlayer(
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(Uri.parse(videoUrl)))
+            setMediaItem(MediaItem.fromUri(videoUrl.toUri()))
             repeatMode = Player.REPEAT_MODE_ONE
             playWhenReady = true
             prepare()

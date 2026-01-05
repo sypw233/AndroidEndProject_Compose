@@ -67,6 +67,7 @@ dependencies {
     // Lifecycle
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.process)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
@@ -111,6 +112,9 @@ dependencies {
     implementation(libs.baidu.map)
     implementation(libs.baidu.map.search)
     implementation(libs.baidu.map.util)
+
+    // Google Ads
+    implementation(libs.play.services.ads)
 
     // Test
     testImplementation(libs.junit)
