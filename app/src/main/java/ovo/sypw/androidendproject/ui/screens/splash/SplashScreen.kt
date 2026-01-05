@@ -35,10 +35,12 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import kotlinx.coroutines.delay
 import ovo.sypw.androidendproject.utils.PreferenceUtils
-import kotlin.random.Random
 
 enum class AdType {
     IMAGE, VIDEO
@@ -50,6 +52,15 @@ data class SplashAd(
     val duration: Int = 5 // 秒
 )
 
+// 预定义的广告图片 URL（与 MainActivity 预加载的相同）
+private val preloadedAdImages = listOf(
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1080&q=80",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1080&q=80",
+    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1080&q=80",
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1080&q=80",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1080&q=80"
+)
+
 @Composable
 fun SplashScreen(
     onNavigateToIntro: () -> Unit,
@@ -59,31 +70,16 @@ fun SplashScreen(
     var countdown by remember { mutableIntStateOf(5) }
     var adFinished by remember { mutableStateOf(false) }
 
-    // 随机选择广告类型
-//    val splashAd = remember {
-//        if (Random.nextBoolean()) {
-//            SplashAd(
-//                type = AdType.IMAGE,
-//                url = "https://picsum.photos/1080/1920?random=${System.currentTimeMillis()}",
-//                duration = 5
-//            )
-//        }
-//        else {
-//            SplashAd(
-//                type = AdType.VIDEO,
-//                url = "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4",
-//                duration = 5
-//            )
-//        }
-//    }
-
-    val splashAd = remember{
+    // 选择一个预加载的图片 URL（图片已在 MainActivity 中预加载到缓存）
+    val splashAd = remember {
+        val index = (System.currentTimeMillis() % preloadedAdImages.size).toInt()
         SplashAd(
             type = AdType.IMAGE,
-            url = "https://picsum.photos/1080/1920?random=${System.currentTimeMillis()}",
+            url = preloadedAdImages[index],
             duration = 5
         )
     }
+
     // 倒计时
     LaunchedEffect(Unit) {
         while (countdown > 0 && !adFinished) {
@@ -101,11 +97,14 @@ fun SplashScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // 广告内容
+        // 广告内容（图片已预加载，会立即显示）
         when (splashAd.type) {
             AdType.IMAGE -> {
                 AsyncImage(
-                    model = splashAd.url,
+                    model = ImageRequest.Builder(context)
+                        .data(splashAd.url)
+                        .crossfade(200)
+                        .build(),
                     contentDescription = "开屏广告",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -123,19 +122,20 @@ fun SplashScreen(
         Surface(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(16.dp)
+                .padding(48.dp)
                 .clickable {
                     adFinished = true
                     navigateNext(context, onNavigateToIntro, onNavigateToMain)
                 },
-            shape = RoundedCornerShape(80.dp),
+            shape = RoundedCornerShape(64.dp),
             color = Color.Black.copy(alpha = 0.6f)
         ) {
             Text(
                 text = if (countdown > 0) "跳过 $countdown" else "跳过",
                 color = Color.White,
                 style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                fontSize = 80.sp,
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
             )
         }
     }
