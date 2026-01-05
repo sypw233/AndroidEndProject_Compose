@@ -51,11 +51,19 @@ fun SettingsScreen(
     onDebugUrlOpen: (String) -> Unit
 ) {
     val context = LocalContext.current
-    
+
     // 广告设置状态
-    var adEnabled by remember { mutableStateOf(PreferenceUtils.getBoolean(context, "ad_enabled", true)) }
+    var adEnabled by remember {
+        mutableStateOf(
+            PreferenceUtils.getBoolean(
+                context,
+                "ad_enabled",
+                true
+            )
+        )
+    }
     var useGoogleAd by remember { mutableStateOf(PreferenceUtils.useGoogleAd(context)) }
-    
+
     // Debug URL 对话框状态
     var showDebugDialog by remember { mutableStateOf(false) }
     var debugUrl by remember { mutableStateOf("https://www.bilibili.com/video/BV1tz421i7zb") }
@@ -112,7 +120,7 @@ fun SettingsScreen(
         ) {
             // ========== 广告设置 ==========
             SettingsSectionHeader(title = "广告设置")
-            
+
             SettingsToggleItem(
                 icon = Icons.Default.AdsClick,
                 title = "开屏广告",
@@ -121,9 +129,12 @@ fun SettingsScreen(
                 onCheckedChange = { enabled ->
                     adEnabled = enabled
                     PreferenceUtils.putBoolean(context, "ad_enabled", enabled)
+                    if (!enabled) {
+                        PreferenceUtils.setUseGoogleAd(context, false)
+                    }
                 }
             )
-            
+
             // 只有在广告开启时才显示 Google 广告选项
             if (adEnabled) {
                 SettingsToggleItem(
@@ -137,14 +148,14 @@ fun SettingsScreen(
                     }
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
             HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
 
             // ========== 开发者选项 ==========
             SettingsSectionHeader(title = "开发者选项")
-            
+
             SettingsClickItem(
                 icon = Icons.Default.BugReport,
                 title = "调试 URL",

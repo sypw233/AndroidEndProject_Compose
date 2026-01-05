@@ -38,7 +38,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 /**
  * 通用 WebView 页面 - 可复用于打开任何链接
- * 
+ *
  * @param url 要打开的网页 URL
  * @param title 页面标题（可选，为空时从网页获取）
  * @param onBack 关闭页面回调
@@ -95,10 +95,12 @@ fun WebViewScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "后退",
-                            tint = if (canGoBack) 
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface 
-                            else 
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            tint = if (canGoBack)
+                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            else
+                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = 0.38f
+                                )
                         )
                     }
                     // 前进按钮
@@ -109,10 +111,12 @@ fun WebViewScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "前进",
-                            tint = if (canGoForward) 
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface 
-                            else 
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            tint = if (canGoForward)
+                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            else
+                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = 0.38f
+                                )
                         )
                     }
                     // 刷新按钮
@@ -139,7 +143,7 @@ fun WebViewScreen(
                 factory = { context ->
                     WebView(context).apply {
                         webViewRef = this
-                        
+
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
                         settings.loadWithOverviewMode = true
@@ -147,7 +151,7 @@ fun WebViewScreen(
                         settings.builtInZoomControls = true
                         settings.displayZoomControls = false
                         settings.setSupportZoom(true)
-                        
+
                         // 增强设置 - 提高兼容性
                         settings.javaScriptCanOpenWindowsAutomatically = true
                         settings.mediaPlaybackRequiresUserGesture = false
@@ -155,13 +159,15 @@ fun WebViewScreen(
                         settings.allowContentAccess = true
                         settings.databaseEnabled = true
                         settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-                        settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                        
+                        settings.mixedContentMode =
+                            android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
                         // 启用硬件加速（WebGL 需要）
                         setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                        
+
                         // 设置移动端 User-Agent（模拟手机浏览器）
-                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                        settings.userAgentString =
+                            "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
 
                         webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(
@@ -178,7 +184,11 @@ fun WebViewScreen(
                                 return false
                             }
 
-                            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                            override fun onPageStarted(
+                                view: WebView?,
+                                url: String?,
+                                favicon: Bitmap?
+                            ) {
                                 super.onPageStarted(view, url, favicon)
                                 isLoading = true
                             }
@@ -197,7 +207,11 @@ fun WebViewScreen(
                                 }
                             }
 
-                            override fun doUpdateVisitedHistory(view: WebView?, historyUrl: String?, isReload: Boolean) {
+                            override fun doUpdateVisitedHistory(
+                                view: WebView?,
+                                historyUrl: String?,
+                                isReload: Boolean
+                            ) {
                                 super.doUpdateVisitedHistory(view, historyUrl, isReload)
                                 // 更新当前 URL
                                 if (historyUrl != null) {

@@ -9,9 +9,27 @@ data class Banner(
 ) {
     companion object {
         fun mock(): List<Banner> = listOf(
-            Banner("1", "热门资讯", "https://picsum.photos/800/400?random=1", "https://example.com/1", 1),
-            Banner("2", "精选推荐", "https://picsum.photos/800/400?random=2", "https://example.com/2", 2),
-            Banner("3", "最新动态", "https://picsum.photos/800/400?random=3", "https://example.com/3", 3)
+            Banner(
+                "1",
+                "热门资讯",
+                "https://picsum.photos/800/400?random=1",
+                "https://example.com/1",
+                1
+            ),
+            Banner(
+                "2",
+                "精选推荐",
+                "https://picsum.photos/800/400?random=2",
+                "https://example.com/2",
+                2
+            ),
+            Banner(
+                "3",
+                "最新动态",
+                "https://picsum.photos/800/400?random=3",
+                "https://example.com/3",
+                3
+            )
         )
     }
 }

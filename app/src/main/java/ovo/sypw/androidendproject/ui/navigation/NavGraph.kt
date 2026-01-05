@@ -23,7 +23,7 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
     val context = LocalContext.current
-    
+
     // 根据广告偏好决定起始页面
     // 如果启用 Google 广告，则跳过 SplashScreen（Google Ad 会由 AppOpenAdManager 显示）
     val startDestination = if (PreferenceUtils.useGoogleAd(context)) {
@@ -91,7 +91,8 @@ fun AppNavigation(
             )
         ) { backStackEntry ->
             val url = URLDecoder.decode(backStackEntry.arguments?.getString("url") ?: "", "UTF-8")
-            val title = URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", "UTF-8")
+            val title =
+                URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", "UTF-8")
             NewsDetailScreen(
                 url = url,
                 title = title,

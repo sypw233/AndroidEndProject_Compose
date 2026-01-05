@@ -8,5 +8,6 @@ sealed interface VideoUiState {
         val videos: List<Video>,
         val hasMore: Boolean
     ) : VideoUiState
+
     data class Error(val message: String) : VideoUiState
 }

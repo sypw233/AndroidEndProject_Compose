@@ -2,6 +2,8 @@ package ovo.sypw.androidendproject.ui.screens.main
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
@@ -15,8 +17,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,7 +33,6 @@ import ovo.sypw.androidendproject.ui.screens.chart.ChartScreen
 import ovo.sypw.androidendproject.ui.screens.home.HomeScreen
 import ovo.sypw.androidendproject.ui.screens.me.MeScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoScreen
-import androidx.compose.ui.platform.LocalContext
 
 enum class BottomNavItem(
     val route: String,
@@ -43,6 +48,23 @@ enum class BottomNavItem(
 @Composable
 fun MainScreen(navController: NavHostController) {
     val bottomNavController = rememberNavController()
+    val context = LocalContext.current
+
+    // 双击退出逻辑
+    var lastBackPressTime by remember { mutableLongStateOf(0L) }
+    val backPressInterval = 2000L // 2秒内双击退出
+
+    BackHandler {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressTime < backPressInterval) {
+            // 双击退出应用
+            (context as? android.app.Activity)?.finish()
+        } else {
+            // 第一次按返回键，显示提示
+            lastBackPressTime = currentTime
+            Toast.makeText(context, "再按一次退出应用", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -77,10 +99,20 @@ fun MainScreen(navController: NavHostController) {
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNewsClick = { news ->
-                        navController.navigate(Screen.NewsDetail.createRoute(news.sourceUrl, news.title))
+                        navController.navigate(
+                            Screen.NewsDetail.createRoute(
+                                news.sourceUrl,
+                                news.title
+                            )
+                        )
                     },
                     onBannerClick = { banner ->
-                        navController.navigate(Screen.NewsDetail.createRoute(banner.linkUrl, banner.title))
+                        navController.navigate(
+                            Screen.NewsDetail.createRoute(
+                                banner.linkUrl,
+                                banner.title
+                            )
+                        )
                     },
                     onCategoryClick = { categoryId ->
                         // Python 分类跳转到 PythonScreen

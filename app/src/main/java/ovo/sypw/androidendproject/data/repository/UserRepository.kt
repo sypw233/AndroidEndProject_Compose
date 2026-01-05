@@ -1,9 +1,7 @@
 package ovo.sypw.androidendproject.data.repository
 
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.tasks.await
 import ovo.sypw.androidendproject.data.model.User
 import ovo.sypw.androidendproject.data.remote.FirebaseWrapper
 
@@ -18,7 +16,11 @@ class UserRepository {
         return FirebaseWrapper.signInWithEmail(email, password)
     }
 
-    suspend fun signUp(email: String, password: String, displayName: String = ""): Result<FirebaseUser> {
+    suspend fun signUp(
+        email: String,
+        password: String,
+        displayName: String = ""
+    ): Result<FirebaseUser> {
         return FirebaseWrapper.signUpWithEmail(email, password, displayName)
     }
 

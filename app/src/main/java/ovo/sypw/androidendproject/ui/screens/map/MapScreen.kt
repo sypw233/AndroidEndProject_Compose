@@ -49,7 +49,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -148,9 +147,11 @@ fun MapScreen(onBack: () -> Unit) {
                         val marker = MarkerOptions()
                             .position(location)
                             .title(poi.name)
-                            .icon(BitmapDescriptorFactory.fromResource(
-                                android.R.drawable.ic_menu_mylocation
-                            ))
+                            .icon(
+                                BitmapDescriptorFactory.fromResource(
+                                    android.R.drawable.ic_menu_mylocation
+                                )
+                            )
                         val bundle = Bundle().apply { putInt("index", index) }
                         marker.extraInfo(bundle)
                         baiduMap.addOverlay(marker)

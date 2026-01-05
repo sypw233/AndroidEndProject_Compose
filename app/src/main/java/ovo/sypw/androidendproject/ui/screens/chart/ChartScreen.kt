@@ -70,6 +70,7 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
             is ChartUiState.Loading -> {
                 LoadingIndicator()
             }
+
             is ChartUiState.Success -> {
                 Column(
                     modifier = Modifier
@@ -109,6 +110,7 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
                                     }
                                 }
                             }
+
                             ChartType.BAR -> {
                                 barChartData?.let { data ->
                                     Column {
@@ -122,6 +124,7 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
                                     }
                                 }
                             }
+
                             ChartType.PIE -> {
                                 pieChartData?.let { data ->
                                     Column(
@@ -132,7 +135,8 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
                                             data = data.items,
                                             selectedIndex = selectedPieIndex,
                                             onSliceClick = { index ->
-                                                selectedPieIndex = if (selectedPieIndex == index) -1 else index
+                                                selectedPieIndex =
+                                                    if (selectedPieIndex == index) -1 else index
                                             }
                                         )
 
@@ -150,7 +154,8 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
                                                 item = item,
                                                 isSelected = selectedPieIndex == index,
                                                 onClick = {
-                                                    selectedPieIndex = if (selectedPieIndex == index) -1 else index
+                                                    selectedPieIndex =
+                                                        if (selectedPieIndex == index) -1 else index
                                                 }
                                             )
                                         }
@@ -161,6 +166,7 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
                     }
                 }
             }
+
             is ChartUiState.Error -> {
                 ErrorView(
                     message = state.message,

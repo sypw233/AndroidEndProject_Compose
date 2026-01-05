@@ -10,5 +10,6 @@ sealed interface HomeUiState {
         val news: List<News>,
         val hasMore: Boolean
     ) : HomeUiState
+
     data class Error(val message: String) : HomeUiState
 }

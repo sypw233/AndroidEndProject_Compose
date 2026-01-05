@@ -1,10 +1,8 @@
 package ovo.sypw.androidendproject.ui.screens.splash
 
-import android.net.Uri
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.OptIn
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,20 +26,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import kotlinx.coroutines.delay
 import ovo.sypw.androidendproject.utils.PreferenceUtils
-import androidx.core.net.toUri
 
 enum class AdType {
     IMAGE, VIDEO
@@ -111,6 +109,7 @@ fun SplashScreen(
                     contentScale = ContentScale.Crop
                 )
             }
+
             AdType.VIDEO -> {
                 SplashVideoPlayer(
                     videoUrl = splashAd.url,

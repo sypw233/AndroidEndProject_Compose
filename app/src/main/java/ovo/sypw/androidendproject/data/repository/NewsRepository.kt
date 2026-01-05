@@ -62,11 +62,15 @@ class NewsRepository(
                 emit(Result.success(NewsListData(emptyList(), emptyList(), false)))
             } else {
                 val pageData = cachedNews.subList(fromIndex, toIndex).toList()
-                emit(Result.success(NewsListData(
-                    banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
-                    news = pageData,
-                    hasMore = toIndex < total
-                )))
+                emit(
+                    Result.success(
+                        NewsListData(
+                            banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
+                            news = pageData,
+                            hasMore = toIndex < total
+                        )
+                    )
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -76,11 +80,15 @@ class NewsRepository(
                 val fromIndex = (page - 1) * pageSize
                 if (fromIndex < total) {
                     val toIndex = minOf(fromIndex + pageSize, total)
-                    emit(Result.success(NewsListData(
-                        banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
-                        news = cachedNews.subList(fromIndex, toIndex).toList(),
-                        hasMore = toIndex < total
-                    )))
+                    emit(
+                        Result.success(
+                            NewsListData(
+                                banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
+                                news = cachedNews.subList(fromIndex, toIndex).toList(),
+                                hasMore = toIndex < total
+                            )
+                        )
+                    )
                     return@flow
                 }
             }
@@ -103,10 +111,14 @@ class NewsRepository(
 
             if (newlyParsedNews.isEmpty()) {
                 // RSS 返回空，使用缓存
-                emit(Result.success(RefreshResultData(
-                    newsListData = getFirstPageData(pageSize),
-                    newItemsCount = 0
-                )))
+                emit(
+                    Result.success(
+                        RefreshResultData(
+                            newsListData = getFirstPageData(pageSize),
+                            newItemsCount = 0
+                        )
+                    )
+                )
                 return@flow
             }
 
@@ -124,10 +136,14 @@ class NewsRepository(
             cachedNews.addAll(mergedNews)
             saveCacheToDisk()
 
-            emit(Result.success(RefreshResultData(
-                newsListData = getFirstPageData(pageSize),
-                newItemsCount = newItemsCount
-            )))
+            emit(
+                Result.success(
+                    RefreshResultData(
+                        newsListData = getFirstPageData(pageSize),
+                        newItemsCount = newItemsCount
+                    )
+                )
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Result.failure(e))
@@ -197,7 +213,7 @@ class NewsRepository(
             val existingIds = cachedNews.map { it.id }.toSet()
             val newIds = parsedNews.map { it.id }.toSet()
             val oldUniqueNews = cachedNews.filter { it.id !in newIds }
-            
+
             cachedNews.clear()
             cachedNews.addAll(parsedNews)
             cachedNews.addAll(oldUniqueNews)
@@ -214,7 +230,7 @@ class NewsRepository(
 
             var eventType = parser.eventType
             var currentTag = ""
-            
+
             var title = ""
             var link = ""
             var description = ""
@@ -233,6 +249,7 @@ class NewsRepository(
                             pubDate = ""
                         }
                     }
+
                     XmlPullParser.TEXT -> {
                         if (insideItem) {
                             val text = parser.text
@@ -244,23 +261,26 @@ class NewsRepository(
                             }
                         }
                     }
+
                     XmlPullParser.END_TAG -> {
                         if (parser.name == "item") {
                             insideItem = false
                             val imageUrl = extractImage(description)
                             val plainContent = description.replace(Regex("<.*?>"), "").trim()
-                            
-                            newsList.add(News(
-                                id = link,
-                                title = title,
-                                content = plainContent.take(100) + "...",
-                                author = "ITHome",
-                                publishTime = formatDate(pubDate),
-                                imageUrl = imageUrl,
-                                sourceUrl = link,
-                                category = "Tech",
-                                viewType = if (imageUrl != null) News.VIEW_TYPE_SINGLE else News.VIEW_TYPE_TEXT
-                            ))
+
+                            newsList.add(
+                                News(
+                                    id = link,
+                                    title = title,
+                                    content = plainContent.take(100) + "...",
+                                    author = "ITHome",
+                                    publishTime = formatDate(pubDate),
+                                    imageUrl = imageUrl,
+                                    sourceUrl = link,
+                                    category = "Tech",
+                                    viewType = if (imageUrl != null) News.VIEW_TYPE_SINGLE else News.VIEW_TYPE_TEXT
+                                )
+                            )
                         }
                         currentTag = ""
                     }

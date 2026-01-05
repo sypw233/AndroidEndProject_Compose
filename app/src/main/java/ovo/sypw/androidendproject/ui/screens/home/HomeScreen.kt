@@ -68,6 +68,7 @@ fun HomeScreen(
                 is HomeUiState.Loading -> {
                     LoadingIndicator()
                 }
+
                 is HomeUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
@@ -109,6 +110,7 @@ fun HomeScreen(
                         }
                     }
                 }
+
                 is HomeUiState.Error -> {
                     ErrorView(
                         message = state.message,

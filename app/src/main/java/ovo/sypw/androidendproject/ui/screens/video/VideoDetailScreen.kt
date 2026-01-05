@@ -61,9 +61,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import kotlinx.coroutines.delay
 import ovo.sypw.androidendproject.data.model.Video
 import ovo.sypw.androidendproject.data.model.VideoDetail
-import kotlinx.coroutines.delay
 
 /**
  * 视频详情页
@@ -100,7 +100,8 @@ fun VideoDetailScreen(
         ExoPlayer.Builder(context).build().apply {
             val mediaItems = video.videoDetailList.map { MediaItem.fromUri(Uri.parse(it.videoUrl)) }
             setMediaItems(mediaItems)
-            videoScalingMode = androidx.media3.common.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+            videoScalingMode =
+                androidx.media3.common.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
             prepare()
         }
     }
@@ -304,7 +305,8 @@ private fun hideSystemUI(activity: Activity?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).let { controller ->
             controller.hide(WindowInsetsCompat.Type.systemBars())
-            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 }
@@ -313,7 +315,10 @@ private fun showSystemUI(activity: Activity?) {
     activity?.let {
         val window = it.window
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(
+            window,
+            window.decorView
+        ).show(WindowInsetsCompat.Type.systemBars())
     }
 }
 

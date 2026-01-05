@@ -24,6 +24,7 @@ class AppOpenAdManager(private val application: Application) : DefaultLifecycleO
 
     companion object {
         private const val TAG = "AppOpenAdManager"
+
         // Google AdMob 开屏广告测试 ID
         private const val AD_UNIT_ID = "ca-app-pub-3940256099942544/9257395921"
     }
@@ -32,7 +33,7 @@ class AppOpenAdManager(private val application: Application) : DefaultLifecycleO
     private var isLoadingAd = false
     private var isShowingAd = false
     private var currentActivity: Activity? = null
-    
+
     // 是否是首次启动（用于冷启动显示广告）
     private var isFirstLaunch = true
 
@@ -84,7 +85,7 @@ class AppOpenAdManager(private val application: Application) : DefaultLifecycleO
                     Log.d(TAG, "开屏广告加载成功")
                     appOpenAd = ad
                     isLoadingAd = false
-                    
+
                     // 首次启动时立即显示广告
                     if (isFirstLaunch) {
                         isFirstLaunch = false

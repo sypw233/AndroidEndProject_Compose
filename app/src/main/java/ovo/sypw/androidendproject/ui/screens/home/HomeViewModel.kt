@@ -81,11 +81,11 @@ class HomeViewModel(
 
     fun refresh() {
         if (_isRefreshing.value) return
-        
+
         viewModelScope.launch {
             _isRefreshing.value = true
             currentPage = 1
-            
+
             try {
                 newsRepository.refreshNews()
                     .catch { e ->
@@ -98,7 +98,7 @@ class HomeViewModel(
                             onSuccess = { refreshData ->
                                 val data = refreshData.newsListData
                                 val newCount = refreshData.newItemsCount
-                                
+
                                 _banners.value = data.banners
                                 _newsList.value = data.news
                                 _uiState.value = HomeUiState.Success(
@@ -106,10 +106,15 @@ class HomeViewModel(
                                     news = _newsList.value,
                                     hasMore = data.hasMore
                                 )
-                                
+
                                 when {
                                     newCount > 0 -> _refreshEvent.emit(RefreshResult.Success("发现 $newCount 条新内容"))
-                                    data.news.isNotEmpty() -> _refreshEvent.emit(RefreshResult.Empty("暂无新内容"))
+                                    data.news.isNotEmpty() -> _refreshEvent.emit(
+                                        RefreshResult.Empty(
+                                            "暂无新内容"
+                                        )
+                                    )
+
                                     else -> _refreshEvent.emit(RefreshResult.Empty("暂无内容"))
                                 }
                             },

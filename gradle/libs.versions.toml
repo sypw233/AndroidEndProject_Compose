@@ -8,10 +8,10 @@ lifecycleProcess = "2.10.0"
 splashscreen = "1.2.0"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
-activityCompose = "1.12.1"
+activityCompose = "1.12.2"
 
 # Compose
-composeBom = "2025.12.00"
+composeBom = "2025.12.01"
 
 # Coroutines
 coroutines = "1.10.2"
@@ -38,13 +38,13 @@ accompanist = "0.36.0"
 composeCharts = "0.2.1"
 
 # Video
-media3 = "1.8.0"
+media3 = "1.9.0"
 
 # Baidu Map
 baiduMap = "7.6.6"
 
 # Google Ads
-playServicesAds = "24.0.0"
+playServicesAds = "24.9.0"
 
 # Test
 junit = "4.13.2"

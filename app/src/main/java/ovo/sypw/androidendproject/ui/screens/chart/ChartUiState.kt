@@ -11,6 +11,7 @@ sealed interface ChartUiState {
         val barChartData: BarChartData?,
         val pieChartData: PieChartData?
     ) : ChartUiState
+
     data class Error(val message: String) : ChartUiState
 }
 

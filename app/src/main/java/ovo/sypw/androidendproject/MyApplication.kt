@@ -14,7 +14,7 @@ import ovo.sypw.androidendproject.di.repositoryModule
 import ovo.sypw.androidendproject.di.viewModelModule
 
 class MyApplication : Application() {
-    
+
     lateinit var appOpenAdManager: AppOpenAdManager
         private set
 

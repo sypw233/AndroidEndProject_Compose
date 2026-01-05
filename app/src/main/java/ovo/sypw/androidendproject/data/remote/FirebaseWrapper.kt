@@ -48,7 +48,11 @@ object FirebaseWrapper {
     /**
      * 邮箱密码注册 (带用户名)
      */
-    suspend fun signUpWithEmail(email: String, password: String, displayName: String = ""): Result<FirebaseUser> {
+    suspend fun signUpWithEmail(
+        email: String,
+        password: String,
+        displayName: String = ""
+    ): Result<FirebaseUser> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             result.user?.let { firebaseUser ->
