@@ -51,4 +51,11 @@ interface ApiService {
 
     @GET
     suspend fun getRssFeed(@retrofit2.http.Url url: String): okhttp3.ResponseBody
+
+    @retrofit2.http.Headers("User-Agent: Mozilla/5.0")
+    @GET("https://api.bilibili.com/x/web-interface/popular")
+    suspend fun getBilibiliPopular(
+        @Query("pn") page: Int = 1,
+        @Query("ps") pageSize: Int = 20
+    ): ovo.sypw.androidendproject.data.model.BilibiliPopularResponse
 }
