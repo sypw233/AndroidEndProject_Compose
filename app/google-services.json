@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1055586409218",
+    "project_id": "androidendporject",
+    "storage_bucket": "androidendporject.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055586409218:android:290dd4a1ff75ebb741401b",
+        "android_client_info": {
+          "package_name": "ovo.sypw.androidendproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1055586409218-hdpmssuhhrffjrnmirkb76rvmub0bvo6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzvsQEaESOWc-vGi4RGfmbHRS7kCtpybk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1055586409218-hdpmssuhhrffjrnmirkb76rvmub0bvo6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
