@@ -117,6 +117,8 @@ fun MapScreen(onBack: () -> Unit) {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            // 初始化时调用 onResume
+            onResume()
         }
     }
 
@@ -194,11 +196,20 @@ fun MapScreen(onBack: () -> Unit) {
         }
     }
 
-    // 清理
+    // 清理百度地图资源（不调用 onDestroy 避免后台线程崩溃）
     DisposableEffect(Unit) {
         onDispose {
-            poiSearch.destroy()
-            mapView.onDestroy()
+            try {
+                // 清除地图覆盖物
+                baiduMap.clear()
+                // 销毁 POI 搜索
+                poiSearch.destroy()
+                // 暂停地图渲染
+                mapView.onPause()
+                // 注意：不调用 mapView.onDestroy()，避免与后台线程冲突导致 native 崩溃
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
