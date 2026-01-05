@@ -95,6 +95,11 @@ fun MainScreen(navController: NavHostController) {
                 VideoScreen(
                     onVideoClick = { video ->
                         navController.navigate(Screen.VideoDetail.createRoute(video.id))
+                    },
+                    onBilibiliVideoClick = { bilibiliVideo ->
+                        // 使用 bvid 构建 B站视频播放页 URL
+                        val bilibiliUrl = "https://www.bilibili.com/video/${bilibiliVideo.bvid}"
+                        navController.navigate(Screen.NewsDetail.createRoute(bilibiliUrl, bilibiliVideo.title))
                     }
                 )
             }

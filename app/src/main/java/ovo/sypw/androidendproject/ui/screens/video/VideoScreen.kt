@@ -62,7 +62,8 @@ import ovo.sypw.androidendproject.ui.components.VideoItem
 @Composable
 fun VideoScreen(
     viewModel: VideoViewModel = koinViewModel(),
-    onVideoClick: (Video) -> Unit
+    onVideoClick: (Video) -> Unit,
+    onBilibiliVideoClick: (BilibiliVideo) -> Unit
 ) {
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -98,6 +99,7 @@ fun VideoScreen(
             when (selectedTab) {
                 0 -> BilibiliPopularTab(
                     viewModel = viewModel,
+                    onVideoClick = onBilibiliVideoClick,
                     modifier = Modifier.fillMaxSize()
                 )
                 1 -> OriginalVideoTab(
@@ -120,6 +122,7 @@ fun VideoScreen(
 @Composable
 private fun BilibiliPopularTab(
     viewModel: VideoViewModel,
+    onVideoClick: (BilibiliVideo) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.bilibiliUiState.collectAsStateWithLifecycle()
@@ -145,7 +148,10 @@ private fun BilibiliPopularTab(
                     item { Spacer(modifier = Modifier.height(8.dp)) }
                     
                     items(videos, key = { "bilibili_${it.bvid}" }) { video ->
-                        BilibiliVideoItem(video = video)
+                        BilibiliVideoItem(
+                            video = video,
+                            onClick = { onVideoClick(video) }
+                        )
                     }
 
                     // 加载更多
@@ -226,10 +232,13 @@ private fun OriginalVideoTab(
 @Composable
 fun BilibiliVideoItem(
     video: BilibiliVideo,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
