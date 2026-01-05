@@ -1,6 +1,9 @@
 package ovo.sypw.androidendproject.ui.screens.web
 
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
+import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -12,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 
@@ -51,6 +56,8 @@ fun WebViewScreen(
     var canGoBack by remember { mutableStateOf(false) }
     var canGoForward by remember { mutableStateOf(false) }
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
+    var currentUrl by remember { mutableStateOf(url) }
+    val context = LocalContext.current
 
     // 处理系统返回键
     BackHandler(enabled = canGoBack) {
@@ -112,6 +119,13 @@ fun WebViewScreen(
                     IconButton(onClick = { webViewRef?.reload() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "刷新")
                     }
+                    // 在浏览器中打开
+                    IconButton(onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(currentUrl))
+                        context.startActivity(intent)
+                    }) {
+                        Icon(Icons.Default.OpenInBrowser, contentDescription = "在浏览器中打开")
+                    }
                 }
             )
         }
@@ -133,6 +147,21 @@ fun WebViewScreen(
                         settings.builtInZoomControls = true
                         settings.displayZoomControls = false
                         settings.setSupportZoom(true)
+                        
+                        // 增强设置 - 提高兼容性
+                        settings.javaScriptCanOpenWindowsAutomatically = true
+                        settings.mediaPlaybackRequiresUserGesture = false
+                        settings.allowFileAccess = true
+                        settings.allowContentAccess = true
+                        settings.databaseEnabled = true
+                        settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                        settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                        
+                        // 启用硬件加速（WebGL 需要）
+                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                        
+                        // 设置移动端 User-Agent（模拟手机浏览器）
+                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
 
                         webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(
@@ -154,9 +183,11 @@ fun WebViewScreen(
                                 isLoading = true
                             }
 
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                super.onPageFinished(view, url)
+                            override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                                super.onPageFinished(view, finishedUrl)
                                 isLoading = false
+                                // 更新当前 URL
+                                currentUrl = finishedUrl ?: url
                                 // 更新导航状态
                                 canGoBack = view?.canGoBack() == true
                                 canGoForward = view?.canGoForward() == true
@@ -166,8 +197,12 @@ fun WebViewScreen(
                                 }
                             }
 
-                            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
-                                super.doUpdateVisitedHistory(view, url, isReload)
+                            override fun doUpdateVisitedHistory(view: WebView?, historyUrl: String?, isReload: Boolean) {
+                                super.doUpdateVisitedHistory(view, historyUrl, isReload)
+                                // 更新当前 URL
+                                if (historyUrl != null) {
+                                    currentUrl = historyUrl
+                                }
                                 // 每次导航变化时更新状态
                                 canGoBack = view?.canGoBack() == true
                                 canGoForward = view?.canGoForward() == true

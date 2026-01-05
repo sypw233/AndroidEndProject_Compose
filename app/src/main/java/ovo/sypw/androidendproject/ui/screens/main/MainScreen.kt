@@ -1,5 +1,7 @@
 package ovo.sypw.androidendproject.ui.screens.main
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
@@ -25,6 +27,7 @@ import ovo.sypw.androidendproject.ui.screens.chart.ChartScreen
 import ovo.sypw.androidendproject.ui.screens.home.HomeScreen
 import ovo.sypw.androidendproject.ui.screens.me.MeScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoScreen
+import androidx.compose.ui.platform.LocalContext
 
 enum class BottomNavItem(
     val route: String,
@@ -92,21 +95,26 @@ fun MainScreen(navController: NavHostController) {
                 ChartScreen()
             }
             composable(Screen.Video.route) {
+                val context = LocalContext.current
                 VideoScreen(
                     onVideoClick = { video ->
                         navController.navigate(Screen.VideoDetail.createRoute(video.id))
                     },
                     onBilibiliVideoClick = { bilibiliVideo ->
-                        // 使用 bvid 构建 B站视频播放页 URL
+                        // 使用系统浏览器打开 B站视频（WebView 不支持 WebGL）
                         val bilibiliUrl = "https://www.bilibili.com/video/${bilibiliVideo.bvid}"
-                        navController.navigate(Screen.NewsDetail.createRoute(bilibiliUrl, bilibiliVideo.title))
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(bilibiliUrl))
+                        context.startActivity(intent)
                     }
                 )
             }
             composable(Screen.Me.route) {
                 MeScreen(
                     onLoginClick = { navController.navigate(Screen.Login.route) },
-                    onMapClick = { navController.navigate(Screen.Map.route) }
+                    onMapClick = { navController.navigate(Screen.Map.route) },
+                    onDebugUrlClick = { url ->
+                        navController.navigate(Screen.NewsDetail.createRoute(url, "调试"))
+                    }
                 )
             }
         }

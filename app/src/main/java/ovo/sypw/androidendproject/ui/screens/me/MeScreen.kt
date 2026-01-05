@@ -38,14 +38,55 @@ import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import ovo.sypw.androidendproject.data.model.User
 import ovo.sypw.androidendproject.ui.components.LoadingIndicator
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 
 @Composable
 fun MeScreen(
     viewModel: MeViewModel = koinViewModel(),
     onLoginClick: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onDebugUrlClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDebugDialog by remember { mutableStateOf(false) }
+    var debugUrl by remember { mutableStateOf("https://www.bilibili.com/video/BV1tz421i7zb") }
+
+    // Debug URL Dialog
+    if (showDebugDialog) {
+        AlertDialog(
+            onDismissRequest = { showDebugDialog = false },
+            title = { Text("调试 URL") },
+            text = {
+                OutlinedTextField(
+                    value = debugUrl,
+                    onValueChange = { debugUrl = it },
+                    label = { Text("输入 URL") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = false,
+                    maxLines = 3
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showDebugDialog = false
+                    onDebugUrlClick(debugUrl)
+                }) {
+                    Text("打开")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDebugDialog = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
 
     when (val state = uiState) {
         is MeUiState.Loading -> {
@@ -55,13 +96,15 @@ fun MeScreen(
             LoggedInContent(
                 user = state.user,
                 onMapClick = onMapClick,
+                onDebugClick = { showDebugDialog = true },
                 onLogout = { viewModel.logout() }
             )
         }
         is MeUiState.NotLoggedIn -> {
             NotLoggedInContent(
                 onLoginClick = onLoginClick,
-                onMapClick = onMapClick
+                onMapClick = onMapClick,
+                onDebugClick = { showDebugDialog = true }
             )
         }
     }
@@ -71,6 +114,7 @@ fun MeScreen(
 private fun LoggedInContent(
     user: User,
     onMapClick: () -> Unit,
+    onDebugClick: () -> Unit,
     onLogout: () -> Unit
 ) {
     Column(
@@ -149,6 +193,11 @@ private fun LoggedInContent(
             title = "设置",
             onClick = { }
         )
+        MeMenuItem(
+            icon = Icons.Default.BugReport,
+            title = "调试 URL",
+            onClick = onDebugClick
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -167,7 +216,8 @@ private fun LoggedInContent(
 @Composable
 private fun NotLoggedInContent(
     onLoginClick: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onDebugClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -214,6 +264,11 @@ private fun NotLoggedInContent(
             icon = Icons.Default.Map,
             title = "附近地图",
             onClick = onMapClick
+        )
+        MeMenuItem(
+            icon = Icons.Default.BugReport,
+            title = "调试 URL",
+            onClick = onDebugClick
         )
     }
 }
