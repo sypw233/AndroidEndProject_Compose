@@ -1,8 +1,9 @@
 package ovo.sypw.androidendproject.data.remote
 
+import android.content.Context
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -10,6 +11,10 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import ovo.sypw.androidendproject.data.model.User
 
+/**
+ * Firebase 封装类
+ * 使用 FirebaseUI 进行身份验证，简化登录流程
+ */
 object FirebaseWrapper {
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
@@ -33,66 +38,34 @@ object FirebaseWrapper {
     }
 
     /**
-     * 邮箱密码登录
+     * 使用 FirebaseUI 登出
+     * 同时清除 FirebaseUI 的登录状态
      */
-    suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser> {
-        return try {
-            val result = auth.signInWithEmailAndPassword(email, password).await()
-            result.user?.let { Result.success(it) }
-                ?: Result.failure(Exception("登录失败"))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    /**
-     * 邮箱密码注册 (带用户名)
-     */
-    suspend fun signUpWithEmail(
-        email: String,
-        password: String,
-        displayName: String = ""
-    ): Result<FirebaseUser> {
-        return try {
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
-            result.user?.let { firebaseUser ->
-                // 如果提供了用户名，更新 Firebase Profile
-                if (displayName.isNotBlank()) {
-                    val profileUpdates = userProfileChangeRequest {
-                        this.displayName = displayName
-                    }
-                    firebaseUser.updateProfile(profileUpdates).await()
-                }
-                // 保存用户信息到 Firestore
-                saveUserToFirestore(firebaseUser, displayName)
-                Result.success(firebaseUser)
-            } ?: Result.failure(Exception("注册失败"))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    /**
-     * 登出
-     */
-    fun signOut() {
-        auth.signOut()
-    }
-
-    /**
-     * 保存用户信息到 Firestore
-     */
-    private suspend fun saveUserToFirestore(firebaseUser: FirebaseUser, displayName: String = "") {
-        val user = User(
-            uid = firebaseUser.uid,
-            email = firebaseUser.email ?: "",
-            displayName = displayName.ifBlank { firebaseUser.displayName },
-            avatarUrl = firebaseUser.photoUrl?.toString()
-        )
-        firestore.collection("users")
-            .document(firebaseUser.uid)
-            .set(user)
+    suspend fun signOut(context: Context) {
+        AuthUI.getInstance()
+            .signOut(context)
             .await()
+    }
+
+    /**
+     * 删除用户账号
+     * 同时删除 FirebaseUI 的登录状态和 Firestore 中的用户数据
+     */
+    suspend fun deleteAccount(context: Context): Result<Unit> {
+        return try {
+            val uid = currentUser?.uid
+            // 删除 Firestore 中的用户数据
+            uid?.let {
+                firestore.collection("users").document(it).delete().await()
+            }
+            // 删除 Firebase Auth 账号
+            AuthUI.getInstance()
+                .delete(context)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     /**

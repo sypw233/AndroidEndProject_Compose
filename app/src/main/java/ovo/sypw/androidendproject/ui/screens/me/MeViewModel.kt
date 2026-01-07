@@ -1,5 +1,6 @@
 package ovo.sypw.androidendproject.ui.screens.me
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +49,14 @@ class MeViewModel(
         }
     }
 
-    fun logout() {
-        userRepository.signOut()
+    /**
+     * 退出登录
+     * 使用 FirebaseUI 的 AuthUI.signOut() 方法
+     */
+    fun logout(context: Context) {
+        viewModelScope.launch {
+            userRepository.signOut(context)
+            // authStateFlow 会自动更新状态
+        }
     }
 }

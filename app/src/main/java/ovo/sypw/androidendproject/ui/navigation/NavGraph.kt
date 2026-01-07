@@ -74,7 +74,7 @@ fun AppNavigation(
             MainScreen(navController = navController)
         }
 
-        // 登录页
+        // 登录页 (使用 FirebaseUI)
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = { navController.popBackStack() },

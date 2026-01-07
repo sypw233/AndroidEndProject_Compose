@@ -1,8 +1,8 @@
 package ovo.sypw.androidendproject.data.model
 
 data class User(
-    val uid: String,
-    val email: String,
+    val uid: String = "",
+    val email: String = "",
     val displayName: String? = null,
     val avatarUrl: String? = null,
     val createdAt: Long = System.currentTimeMillis()

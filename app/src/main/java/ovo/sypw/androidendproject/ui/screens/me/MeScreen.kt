@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -46,6 +47,7 @@ fun MeScreen(
     onSettingsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -61,7 +63,7 @@ fun MeScreen(
             is MeUiState.LoggedIn -> {
                 UserInfoCard(
                     user = state.user,
-                    onLogout = { viewModel.logout() }
+                    onLogout = { viewModel.logout(context) }
                 )
             }
 
@@ -89,7 +91,7 @@ fun MeScreen(
         // 退出登录按钮（仅登录状态显示）
         if (uiState is MeUiState.LoggedIn) {
             TextButton(
-                onClick = { viewModel.logout() },
+                onClick = { viewModel.logout(context) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)

@@ -29,6 +29,7 @@ coil = "3.3.0"
 
 # Firebase
 firebaseBom = "34.7.0"
+firebaseUi = "9.0.0"
 googleServices = "4.4.4"
 
 # Accompanist
@@ -105,6 +106,7 @@ coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", versi
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref = "firebaseUi" }
 
 # Accompanist
 accompanist-pager = { group = "com.google.accompanist", name = "accompanist-pager", version.ref = "accompanist" }
