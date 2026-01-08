@@ -11,8 +11,8 @@ import ovo.sypw.androidendproject.data.repository.UserRepository
 import ovo.sypw.androidendproject.data.repository.VideoRepository
 import ovo.sypw.androidendproject.ui.screens.chart.ChartViewModel
 import ovo.sypw.androidendproject.ui.screens.home.HomeViewModel
-import ovo.sypw.androidendproject.ui.screens.me.MeViewModel
 import ovo.sypw.androidendproject.ui.screens.login.LoginViewModel
+import ovo.sypw.androidendproject.ui.screens.me.MeViewModel
 import ovo.sypw.androidendproject.ui.screens.video.VideoViewModel
 
 val appModule = module {

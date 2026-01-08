@@ -45,7 +45,7 @@ import com.kevinnzou.web.rememberWebViewState
 
 /**
  * 通用 WebView 页面 - 使用 compose-webview 库
- * 
+ *
  * 支持拦截自定义 URL Scheme（如 bilibili://），首次加载阻止跳转，
  * 后续用户主动点击时弹出确认对话框后才允许跳转到外部应用
  *
@@ -64,12 +64,12 @@ fun WebViewScreen(
     val context = LocalContext.current
     val state = rememberWebViewState(url = url)
     val navigator = rememberWebViewNavigator()
-    
+
     var pageTitle by remember { mutableStateOf(title) }
-    
+
     // 跟踪页面加载次数，用于区分首次加载和后续导航
     var pageLoadCount by remember { mutableIntStateOf(0) }
-    
+
     // 外部应用跳转确认对话框状态
     var showExternalAppDialog by remember { mutableStateOf(false) }
     var pendingExternalUrl by remember { mutableStateOf<String?>(null) }
@@ -96,8 +96,11 @@ fun WebViewScreen(
                 request: WebResourceRequest?
             ): Boolean {
                 val requestUrl = request?.url?.toString() ?: return false
-                Log.d("WebViewScreen", "shouldOverrideUrlLoading: $requestUrl, pageLoadCount=$pageLoadCount")
-                
+                Log.d(
+                    "WebViewScreen",
+                    "shouldOverrideUrlLoading: $requestUrl, pageLoadCount=$pageLoadCount"
+                )
+
                 // 检查是否是自定义 URL Scheme（非 http/https）
                 if (!requestUrl.startsWith("http://") && !requestUrl.startsWith("https://")) {
                     // 首次加载时阻止跳转到自定义协议（如 bilibili://）
@@ -105,14 +108,14 @@ fun WebViewScreen(
                         Log.d("WebViewScreen", "阻止首次跳转到自定义协议: $requestUrl")
                         return true // 阻止跳转
                     }
-                    
+
                     // 后续用户主动点击时，显示确认对话框
                     Log.d("WebViewScreen", "请求确认跳转到外部应用: $requestUrl")
                     pendingExternalUrl = requestUrl
                     showExternalAppDialog = true
                     return true // 阻止直接跳转，等待用户确认
                 }
-                
+
                 // 允许 http/https 链接在 WebView 内加载
                 return false
             }
@@ -129,15 +132,15 @@ fun WebViewScreen(
     if (showExternalAppDialog && pendingExternalUrl != null) {
         val externalUrl = pendingExternalUrl!!
         val appName = getAppNameFromScheme(externalUrl)
-        
+
         AlertDialog(
             onDismissRequest = {
                 showExternalAppDialog = false
                 pendingExternalUrl = null
             },
             title = { Text("打开外部应用") },
-            text = { 
-                Text("是否打开 $appName？\n\n将要跳转到：${externalUrl.take(50)}${if (externalUrl.length > 50) "..." else ""}") 
+            text = {
+                Text("是否打开 $appName？\n\n将要跳转到：${externalUrl.take(50)}${if (externalUrl.length > 50) "..." else ""}")
             },
             confirmButton = {
                 TextButton(
@@ -219,7 +222,8 @@ fun WebViewScreen(
                     }
                     // 在浏览器中打开
                     IconButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(state.lastLoadedUrl ?: url))
+                        val intent =
+                            Intent(Intent.ACTION_VIEW, Uri.parse(state.lastLoadedUrl ?: url))
                         context.startActivity(intent)
                     }) {
                         Icon(Icons.Default.OpenInBrowser, contentDescription = "在浏览器中打开")
@@ -253,7 +257,8 @@ fun WebViewScreen(
                         allowContentAccess = true
                         cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
                         mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                        userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                        userAgentString =
+                            "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
                     }
                     webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                 }

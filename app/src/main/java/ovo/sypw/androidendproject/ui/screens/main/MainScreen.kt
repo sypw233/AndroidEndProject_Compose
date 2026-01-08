@@ -125,7 +125,14 @@ fun MainScreen(navController: NavHostController) {
                 )
             }
             composable(Screen.Chart.route) {
-                ChartScreen()
+                ChartScreen(
+                    onVideoClick = { rankingItem ->
+                        val videoUrl = "https://www.bilibili.com/video/${rankingItem.bvid}"
+                        navController.navigate(
+                            Screen.NewsDetail.createRoute(videoUrl, rankingItem.title)
+                        )
+                    }
+                )
             }
             composable(Screen.Video.route) {
                 val context = LocalContext.current

@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +46,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -71,7 +69,6 @@ import androidx.core.content.ContextCompat
 import com.amap.api.location.AMapLocationClient
 import com.amap.api.location.AMapLocationClientOption
 import com.amap.api.location.AMapLocationListener
-import com.amap.api.maps.AMap
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.MapView
 import com.amap.api.maps.model.LatLng
@@ -178,8 +175,12 @@ fun MapScreen(onBack: () -> Unit) {
                         CameraUpdateFactory.newLatLngZoom(currentLocation, 15f)
                     )
                 } else {
-                    Log.w("MapScreen", "定位失败: errorCode=${location.errorCode}, errorInfo=${location.errorInfo}")
-                    Toast.makeText(context, "定位失败：${location.errorInfo}", Toast.LENGTH_SHORT).show()
+                    Log.w(
+                        "MapScreen",
+                        "定位失败: errorCode=${location.errorCode}, errorInfo=${location.errorInfo}"
+                    )
+                    Toast.makeText(context, "定位失败：${location.errorInfo}", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -256,7 +257,10 @@ fun MapScreen(onBack: () -> Unit) {
 
             val poiSearch = PoiSearchV2(context, query)
             poiSearch.bound = PoiSearchV2.SearchBound(
-                com.amap.api.services.core.LatLonPoint(currentLocation.latitude, currentLocation.longitude),
+                com.amap.api.services.core.LatLonPoint(
+                    currentLocation.latitude,
+                    currentLocation.longitude
+                ),
                 10000
             )
             poiSearch.setOnPoiSearchListener(object : PoiSearchV2.OnPoiSearchListener {
@@ -355,9 +359,9 @@ fun MapScreen(onBack: () -> Unit) {
                 // 搜索按钮
                 FloatingActionButton(
                     onClick = { showSearchPanel = !showSearchPanel },
-                    containerColor = if (showSearchPanel) 
-                        MaterialTheme.colorScheme.secondaryContainer 
-                    else 
+                    containerColor = if (showSearchPanel)
+                        MaterialTheme.colorScheme.secondaryContainer
+                    else
                         MaterialTheme.colorScheme.secondary
                 ) {
                     Icon(
