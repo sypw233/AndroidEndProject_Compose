@@ -33,6 +33,7 @@ import ovo.sypw.androidendproject.ui.screens.chart.ChartScreen
 import ovo.sypw.androidendproject.ui.screens.home.HomeScreen
 import ovo.sypw.androidendproject.ui.screens.me.MeScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoScreen
+import androidx.core.net.toUri
 
 enum class BottomNavItem(
     val route: String,
@@ -133,10 +134,10 @@ fun MainScreen(navController: NavHostController) {
                         navController.navigate(Screen.VideoDetail.createRoute(video.id))
                     },
                     onBilibiliVideoClick = { bilibiliVideo ->
-                        // 使用系统浏览器打开 B站视频（WebView 不支持 WebGL）
                         val bilibiliUrl = "https://www.bilibili.com/video/${bilibiliVideo.bvid}"
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(bilibiliUrl))
-                        context.startActivity(intent)
+                        navController.navigate(
+                            Screen.NewsDetail.createRoute(bilibiliUrl, bilibiliVideo.title)
+                        )
                     }
                 )
             }

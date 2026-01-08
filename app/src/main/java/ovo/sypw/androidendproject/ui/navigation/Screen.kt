@@ -13,11 +13,19 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Map : Screen("map")
 
-    data object NewsDetail : Screen("news_detail/{url}/{title}") {
-        fun createRoute(url: String, title: String): String {
+    // 通用 WebView 页面
+    data object WebView : Screen("webview/{url}/{title}") {
+        fun createRoute(url: String, title: String = ""): String {
             val encodedUrl = URLEncoder.encode(url, "UTF-8")
             val encodedTitle = URLEncoder.encode(title, "UTF-8")
-            return "news_detail/$encodedUrl/$encodedTitle"
+            return "webview/$encodedUrl/$encodedTitle"
+        }
+    }
+
+    // 保留 NewsDetail 作为别名以保持向后兼容
+    data object NewsDetail : Screen("webview/{url}/{title}") {
+        fun createRoute(url: String, title: String = ""): String {
+            return WebView.createRoute(url, title)
         }
     }
 

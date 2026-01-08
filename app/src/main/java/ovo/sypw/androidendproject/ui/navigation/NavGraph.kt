@@ -12,7 +12,6 @@ import ovo.sypw.androidendproject.ui.screens.intro.IntroScreen
 import ovo.sypw.androidendproject.ui.screens.login.LoginScreen
 import ovo.sypw.androidendproject.ui.screens.main.MainScreen
 import ovo.sypw.androidendproject.ui.screens.map.MapScreen
-import ovo.sypw.androidendproject.ui.screens.news.NewsDetailScreen
 import ovo.sypw.androidendproject.ui.screens.splash.SplashScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoDetailScreen
 import ovo.sypw.androidendproject.utils.PreferenceUtils
@@ -82,9 +81,9 @@ fun AppNavigation(
             )
         }
 
-        // 新闻详情页
+        // 通用 WebView 页面
         composable(
-            route = Screen.NewsDetail.route,
+            route = Screen.WebView.route,
             arguments = listOf(
                 navArgument("url") { type = NavType.StringType },
                 navArgument("title") { type = NavType.StringType }
@@ -93,7 +92,7 @@ fun AppNavigation(
             val url = URLDecoder.decode(backStackEntry.arguments?.getString("url") ?: "", "UTF-8")
             val title =
                 URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", "UTF-8")
-            NewsDetailScreen(
+            ovo.sypw.androidendproject.ui.screens.web.WebViewScreen(
                 url = url,
                 title = title,
                 onBack = { navController.popBackStack() }
