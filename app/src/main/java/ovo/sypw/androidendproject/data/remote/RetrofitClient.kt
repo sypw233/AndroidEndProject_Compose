@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import ovo.sypw.androidendproject.utils.Constants
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
@@ -17,9 +18,9 @@ object RetrofitClient {
 
         OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(Constants.NETWORK_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(Constants.NETWORK_READ_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(Constants.NETWORK_WRITE_TIMEOUT, TimeUnit.SECONDS)
             .build()
     }
 

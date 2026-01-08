@@ -11,6 +11,13 @@ object PreferenceUtils {
     private const val KEY_BILIBILI_COOKIES = "bilibili_cookies"
 
 
+    // ========== AI 配置 ==========
+    private const val KEY_AI_BASE_URL = "ai_base_url"
+    private const val KEY_AI_API_KEY = "ai_api_key"
+    private const val KEY_AI_DEFAULT_MODEL = "ai_default_model"
+    private const val KEY_AI_MODELS = "ai_models"
+    private const val KEY_AI_LAST_MODEL = "ai_last_model"
+
     private fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
@@ -25,8 +32,6 @@ object PreferenceUtils {
 
     /**
      * 是否使用 Google AdMob 开屏广告
-     * true = Google AdMob 开屏广告
-     * false = 自定义启动屏（图片/视频）
      */
     fun useGoogleAd(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_USE_GOOGLE_AD, false)
@@ -41,7 +46,7 @@ object PreferenceUtils {
     }
 
     fun putString(context: Context, key: String, value: String) {
-        getPreferences(context).edit().putString(key, value).apply()
+        getPreferences(context).edit { putString(key, value) }
     }
 
     fun getBoolean(context: Context, key: String, defaultValue: Boolean = false): Boolean {
@@ -49,33 +54,26 @@ object PreferenceUtils {
     }
 
     fun putBoolean(context: Context, key: String, value: Boolean) {
-        getPreferences(context).edit().putBoolean(key, value).apply()
+        getPreferences(context).edit { putBoolean(key, value) }
     }
 
     fun clear(context: Context) {
-        getPreferences(context).edit().clear().apply()
+        getPreferences(context).edit { clear() }
     }
 
     /**
      * 获取 B站 Cookies
      */
     fun getBilibiliCookies(context: Context): String {
-        return getPreferences(context).getString(KEY_BILIBILI_COOKIES, "") ?: ""
+        return getString(context, KEY_BILIBILI_COOKIES)
     }
 
     /**
      * 设置 B站 Cookies
      */
     fun setBilibiliCookies(context: Context, cookies: String) {
-        getPreferences(context).edit { putString(KEY_BILIBILI_COOKIES, cookies) }
+        putString(context, KEY_BILIBILI_COOKIES, cookies)
     }
-
-    // ========== AI 配置 ==========
-    private const val KEY_AI_BASE_URL = "ai_base_url"
-    private const val KEY_AI_API_KEY = "ai_api_key"
-    private const val KEY_AI_DEFAULT_MODEL = "ai_default_model"
-    private const val KEY_AI_MODELS = "ai_models"
-    private const val KEY_AI_LAST_MODEL = "ai_last_model"
 
     fun getAIBaseUrl(context: Context): String {
         return getString(context, KEY_AI_BASE_URL, "https://api.moonshot.cn/v1")
@@ -86,7 +84,7 @@ object PreferenceUtils {
     }
 
     fun getAIApiKey(context: Context): String {
-        return getString(context, KEY_AI_API_KEY, "")
+        return getString(context, KEY_AI_API_KEY)
     }
 
     fun setAIApiKey(context: Context, key: String) {
@@ -102,7 +100,7 @@ object PreferenceUtils {
     }
 
     fun getAIModelsJson(context: Context): String {
-        return getString(context, KEY_AI_MODELS, "")
+        return getString(context, KEY_AI_MODELS)
     }
 
     fun setAIModelsJson(context: Context, json: String) {

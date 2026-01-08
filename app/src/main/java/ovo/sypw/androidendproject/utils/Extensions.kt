@@ -46,6 +46,27 @@ fun Int.formatCount(): String {
     }
 }
 
+fun Long.formatCount(): String {
+    return when {
+        this >= 100000000 -> String.format("%.1f亿", this / 100000000.0)
+        this >= 10000 -> String.format("%.1f万", this / 10000.0)
+        this >= 1000 -> String.format("%.1fk", this / 1000.0)
+        else -> this.toString()
+    }
+}
+
+/**
+ * Float 格式化为大数字显示
+ */
+fun Float.formatLargeNumber(): String {
+    return when {
+        this >= 10000 -> "%.1f万".format(this / 10000)
+        this >= 1000 -> "%.1f千".format(this / 1000)
+        this >= 100 -> "%.0f".format(this)
+        else -> "%.1f".format(this)
+    }
+}
+
 /**
  * 时长格式化 (秒转 mm:ss)
  */

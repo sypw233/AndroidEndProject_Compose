@@ -46,6 +46,7 @@ import kotlin.math.roundToInt
 import ovo.sypw.androidendproject.data.model.BarChartData as AppBarChartData
 import ovo.sypw.androidendproject.data.model.LineChartData as AppLineChartData
 import ovo.sypw.androidendproject.data.model.PieChartData as AppPieChartData
+import ovo.sypw.androidendproject.utils.formatLargeNumber
 
 /**
  * 自定义可交互折线图
@@ -121,7 +122,7 @@ fun AppLineChart(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "播放量: ${formatLargeNumber(values[selectedIndex])}万",
+                            text = "播放量: ${values[selectedIndex].formatLargeNumber()}万",
                             style = MaterialTheme.typography.bodyLarge,
                             color = primaryColor
                         )
@@ -143,7 +144,7 @@ fun AppLineChart(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "平均值: ${formatLargeNumber(avgValue)}万",
+                text = "平均值: ${avgValue.formatLargeNumber()}万",
                 style = MaterialTheme.typography.labelMedium,
                 color = outlineColor
             )
@@ -189,7 +190,7 @@ fun AppLineChart(
                     strokeWidth = 1f
                 )
                 drawContext.canvas.nativeCanvas.drawText(
-                    formatLargeNumber(value),
+                    value.formatLargeNumber(),
                     padding - 8f, y + 5f,
                     android.graphics.Paint().apply {
                         color = android.graphics.Color.GRAY
@@ -299,7 +300,6 @@ fun AppBarChart(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.tertiary
-    MaterialTheme.colorScheme.surface
     val outlineColor = MaterialTheme.colorScheme.outline
 
     var selectedIndex by remember { mutableIntStateOf(-1) }
@@ -360,7 +360,7 @@ fun AppBarChart(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "点赞: ${formatLargeNumber(values1[selectedIndex])}千",
+                                text = "点赞: ${values1[selectedIndex].formatLargeNumber()}千",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -375,11 +375,9 @@ fun AppBarChart(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "投币: ${
-                                        formatLargeNumber(
-                                            values2?.getOrNull(
-                                                selectedIndex
-                                            ) ?: 0f
-                                        )
+                                        (values2?.getOrNull(
+                                            selectedIndex
+                                        ) ?: 0f).formatLargeNumber()
                                     }千",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -454,7 +452,7 @@ fun AppBarChart(
                     strokeWidth = 1f
                 )
                 drawContext.canvas.nativeCanvas.drawText(
-                    formatLargeNumber(value),
+                    value.formatLargeNumber(),
                     padding - 8f, y + 5f,
                     android.graphics.Paint().apply {
                         color = android.graphics.Color.GRAY
@@ -524,14 +522,7 @@ fun AppBarChart(
     }
 }
 
-private fun formatLargeNumber(value: Float): String {
-    return when {
-        value >= 10000 -> "%.1f万".format(value / 10000)
-        value >= 1000 -> "%.1f千".format(value / 1000)
-        value >= 100 -> "%.0f".format(value)
-        else -> "%.1f".format(value)
-    }
-}
+// formatLargeNumber moved to Extensions.kt as Float.formatLargeNumber()
 
 /**
  * 自定义可交互饼图

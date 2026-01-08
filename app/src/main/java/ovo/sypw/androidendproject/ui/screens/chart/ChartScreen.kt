@@ -53,6 +53,7 @@ import ovo.sypw.androidendproject.ui.components.AppPieChart
 import ovo.sypw.androidendproject.ui.components.ErrorView
 import ovo.sypw.androidendproject.ui.components.LoadingIndicator
 import ovo.sypw.androidendproject.ui.components.SpeedDialFab
+import ovo.sypw.androidendproject.utils.formatCount
 
 @Composable
 fun ChartScreen(
@@ -329,11 +330,11 @@ private fun RankingVideoCard(
                 ) {
                     StatItem(
                         icon = Icons.Default.PlayArrow,
-                        value = formatCount(item.stat.view)
+                        value = item.stat.view.formatCount()
                     )
                     StatItem(
                         icon = Icons.Default.ThumbUp,
-                        value = formatCount(item.stat.like)
+                        value = item.stat.like.formatCount()
                     )
                 }
             }
@@ -374,11 +375,4 @@ private fun StatItem(
     }
 }
 
-private fun formatCount(count: Long): String {
-    return when {
-        count >= 100_000_000 -> "%.1f亿".format(count / 100_000_000f)
-        count >= 10_000 -> "%.1f万".format(count / 10_000f)
-        count >= 1000 -> "%.1fk".format(count / 1000f)
-        else -> count.toString()
-    }
-}
+
