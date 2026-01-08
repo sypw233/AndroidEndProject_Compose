@@ -103,7 +103,7 @@ class ChartRepository(
                     .entries
                     .sortedByDescending { it.value }
                     .take(8) // 取前8个分区
-                
+
                 val total = categoryCount.sumOf { it.value }
                 val colors = listOf(
                     0xFFE91E63.toInt(),  // 粉色
@@ -115,7 +115,7 @@ class ChartRepository(
                     0xFFFF5722.toInt(),  // 深橙
                     0xFF795548.toInt()   // 棕色
                 )
-                
+
                 val items = categoryCount.mapIndexed { index, entry ->
                     PieChartItem(
                         label = entry.key,
@@ -123,7 +123,7 @@ class ChartRepository(
                         color = colors.getOrElse(index) { 0xFF888888.toInt() }
                     )
                 }
-                
+
                 val data = PieChartData(
                     title = "B站排行榜分区分布",
                     items = items

@@ -46,7 +46,10 @@ object FirebaseWrapper {
         Log.d(TAG, "signInWithEmail: 开始, email=$email")
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
-            Log.d(TAG, "signInWithEmail: 成功, user=${result.user?.uid}, isEmailVerified=${result.user?.isEmailVerified}")
+            Log.d(
+                TAG,
+                "signInWithEmail: 成功, user=${result.user?.uid}, isEmailVerified=${result.user?.isEmailVerified}"
+            )
             Result.success(result)
         } catch (e: Exception) {
             Log.e(TAG, "signInWithEmail: 失败", e)

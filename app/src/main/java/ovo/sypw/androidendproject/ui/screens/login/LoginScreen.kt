@@ -6,8 +6,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -46,8 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -91,7 +85,8 @@ fun LoginScreen(
                 }
             } catch (e: ApiException) {
                 Log.w("LoginScreen", "Google sign in failed", e)
-                Toast.makeText(context, "Google 登录失败: ${e.statusCode}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Google 登录失败: ${e.statusCode}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -106,18 +101,26 @@ fun LoginScreen(
                 Log.d("LoginScreen", "LaunchedEffect: onLoginSuccess 已调用, 重置状态")
                 viewModel.resetState()
             }
+
             is LoginUiState.VerificationRequired -> {
                 Log.d("LoginScreen", "LaunchedEffect: 处理 VerificationRequired 状态")
-                Toast.makeText(context, "验证邮件已发送，请查收邮箱并验证后登录", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "验证邮件已发送，请查收邮箱并验证后登录", Toast.LENGTH_LONG)
+                    .show()
                 viewModel.resetState()
             }
+
             is LoginUiState.Error -> {
-                Log.d("LoginScreen", "LaunchedEffect: 处理 Error 状态, message=${(uiState as LoginUiState.Error).message}")
+                Log.d(
+                    "LoginScreen",
+                    "LaunchedEffect: 处理 Error 状态, message=${(uiState as LoginUiState.Error).message}"
+                )
                 snackbarHostState.showSnackbar((uiState as LoginUiState.Error).message)
             }
+
             is LoginUiState.Loading -> {
                 Log.d("LoginScreen", "LaunchedEffect: 状态为 Loading")
             }
+
             is LoginUiState.Idle -> {
                 Log.d("LoginScreen", "LaunchedEffect: 状态为 Idle")
             }
@@ -227,13 +230,23 @@ fun LoginScreen(
                 TextButton(onClick = { isRegisterMode = !isRegisterMode }) {
                     Text(if (isRegisterMode) "已有账号？去登录" else "没有账号？去注册")
                 }
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = Modifier.weight(1f).height(1.dp).padding(end = 8.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp)
+                            .padding(end = 8.dp)
+                    )
                     Text("其他登录方式", style = MaterialTheme.typography.bodySmall)
-                    Spacer(modifier = Modifier.weight(1f).height(1.dp).padding(start = 8.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp)
+                            .padding(start = 8.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

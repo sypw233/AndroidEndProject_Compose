@@ -42,6 +42,7 @@ import com.kevinnzou.web.LoadingState
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewNavigator
 import com.kevinnzou.web.rememberWebViewState
+import ovo.sypw.androidendproject.utils.UrlUtils
 
 /**
  * 通用 WebView 页面 - 使用 compose-webview 库
@@ -92,7 +93,7 @@ fun WebViewScreen(
     val webViewClient = remember {
         object : AccompanistWebViewClient() {
             override fun shouldOverrideUrlLoading(
-                view: android.webkit.WebView?,
+                view: WebView?,
                 request: WebResourceRequest?
             ): Boolean {
                 val requestUrl = request?.url?.toString() ?: return false
@@ -102,7 +103,7 @@ fun WebViewScreen(
                 )
 
                 // 检查是否是自定义 URL Scheme（非 http/https）
-                if (!requestUrl.startsWith("http://") && !requestUrl.startsWith("https://")) {
+                if (!UrlUtils.isHttpUrl(requestUrl)) {
                     // 首次加载时阻止跳转到自定义协议（如 bilibili://）
                     if (pageLoadCount <= 1) {
                         Log.d("WebViewScreen", "阻止首次跳转到自定义协议: $requestUrl")
@@ -131,7 +132,7 @@ fun WebViewScreen(
     // 外部应用跳转确认对话框
     if (showExternalAppDialog && pendingExternalUrl != null) {
         val externalUrl = pendingExternalUrl!!
-        val appName = getAppNameFromScheme(externalUrl)
+        val appName = UrlUtils.getAppNameFromScheme(externalUrl)
 
         AlertDialog(
             onDismissRequest = {
@@ -275,26 +276,4 @@ fun WebViewScreen(
     }
 }
 
-/**
- * 根据 URL Scheme 获取应用名称
- */
-private fun getAppNameFromScheme(url: String): String {
-    return when {
-        url.startsWith("bilibili://") -> "哔哩哔哩"
-        url.startsWith("weixin://") || url.startsWith("wechat://") -> "微信"
-        url.startsWith("alipay://") || url.startsWith("alipays://") -> "支付宝"
-        url.startsWith("taobao://") -> "淘宝"
-        url.startsWith("jd://") -> "京东"
-        url.startsWith("douyin://") -> "抖音"
-        url.startsWith("snssdk://") -> "今日头条"
-        url.startsWith("weibo://") -> "微博"
-        url.startsWith("zhihu://") -> "知乎"
-        url.startsWith("mqq://") || url.startsWith("mqqapi://") -> "QQ"
-        url.startsWith("intent://") -> "外部应用"
-        else -> {
-            // 尝试从 URL 中提取 scheme 作为应用名
-            val scheme = url.substringBefore("://")
-            if (scheme.isNotEmpty()) "${scheme}应用" else "外部应用"
-        }
-    }
-}
+

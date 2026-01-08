@@ -220,7 +220,11 @@ fun SettingsScreen(
             SettingsClickItem(
                 icon = Icons.Default.Cookie,
                 title = "B站 Cookies",
-                subtitle = if (bilibiliCookies.isBlank()) "未设置" else "已设置 (${bilibiliCookies.take(20)}...)",
+                subtitle = if (bilibiliCookies.isBlank()) "未设置" else "已设置 (${
+                    bilibiliCookies.take(
+                        20
+                    )
+                }...)",
                 onClick = {
                     tempCookies = bilibiliCookies
                     showCookiesDialog = true

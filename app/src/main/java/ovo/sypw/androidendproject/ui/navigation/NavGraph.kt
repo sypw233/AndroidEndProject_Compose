@@ -8,10 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ovo.sypw.androidendproject.ui.screens.home.python.PythonScreen
 import ovo.sypw.androidendproject.ui.screens.intro.IntroScreen
 import ovo.sypw.androidendproject.ui.screens.login.LoginScreen
 import ovo.sypw.androidendproject.ui.screens.main.MainScreen
-import ovo.sypw.androidendproject.ui.screens.map.MapScreen
+import ovo.sypw.androidendproject.ui.screens.me.map.MapScreen
 import ovo.sypw.androidendproject.ui.screens.splash.SplashScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoDetailScreen
 import ovo.sypw.androidendproject.utils.PreferenceUtils
@@ -124,7 +125,7 @@ fun AppNavigation(
 
         // Python课程页
         composable(Screen.Python.route) {
-            ovo.sypw.androidendproject.ui.screens.python.PythonScreen(
+            PythonScreen(
                 onBack = { navController.popBackStack() }
             )
         }

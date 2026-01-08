@@ -1,7 +1,5 @@
 package ovo.sypw.androidendproject.ui.screens.main
 
-import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
@@ -33,7 +31,6 @@ import ovo.sypw.androidendproject.ui.screens.chart.ChartScreen
 import ovo.sypw.androidendproject.ui.screens.home.HomeScreen
 import ovo.sypw.androidendproject.ui.screens.me.MeScreen
 import ovo.sypw.androidendproject.ui.screens.video.VideoScreen
-import androidx.core.net.toUri
 
 enum class BottomNavItem(
     val route: String,
@@ -135,7 +132,6 @@ fun MainScreen(navController: NavHostController) {
                 )
             }
             composable(Screen.Video.route) {
-                val context = LocalContext.current
                 VideoScreen(
                     onVideoClick = { video ->
                         navController.navigate(Screen.VideoDetail.createRoute(video.id))

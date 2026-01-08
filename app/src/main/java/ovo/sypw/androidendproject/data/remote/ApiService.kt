@@ -3,7 +3,6 @@ package ovo.sypw.androidendproject.data.remote
 import ovo.sypw.androidendproject.data.model.Banner
 import ovo.sypw.androidendproject.data.model.News
 import ovo.sypw.androidendproject.data.model.Video
-import ovo.sypw.androidendproject.utils.PreferenceUtils
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query

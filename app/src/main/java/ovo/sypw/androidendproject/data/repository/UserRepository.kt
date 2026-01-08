@@ -21,7 +21,11 @@ class UserRepository {
         return FirebaseWrapper.signInWithEmail(email, password)
     }
 
-    suspend fun signUpWithEmail(email: String, password: String, displayName: String): Result<AuthResult> {
+    suspend fun signUpWithEmail(
+        email: String,
+        password: String,
+        displayName: String
+    ): Result<AuthResult> {
         return FirebaseWrapper.signUpWithEmail(email, password, displayName)
     }
 

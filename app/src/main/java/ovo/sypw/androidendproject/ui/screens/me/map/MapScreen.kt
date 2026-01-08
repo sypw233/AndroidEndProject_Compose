@@ -1,4 +1,4 @@
-package ovo.sypw.androidendproject.ui.screens.map
+package ovo.sypw.androidendproject.ui.screens.me.map
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -74,6 +74,7 @@ import com.amap.api.maps.MapView
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
 import com.amap.api.maps.model.MyLocationStyle
+import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItemV2
 import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
@@ -257,7 +258,7 @@ fun MapScreen(onBack: () -> Unit) {
 
             val poiSearch = PoiSearchV2(context, query)
             poiSearch.bound = PoiSearchV2.SearchBound(
-                com.amap.api.services.core.LatLonPoint(
+                LatLonPoint(
                     currentLocation.latitude,
                     currentLocation.longitude
                 ),
@@ -321,7 +322,8 @@ fun MapScreen(onBack: () -> Unit) {
     }
 
     // 快捷搜索分类
-    val quickSearchCategories = listOf("餐厅", "酒店", "银行", "医院", "超市", "加油站", "停车场")
+    val quickSearchCategories =
+        listOf("餐厅", "厕所", "酒店", "银行", "医院", "超市", "加油站", "停车场")
 
     Scaffold(
         topBar = {

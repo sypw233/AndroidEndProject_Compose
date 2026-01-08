@@ -1,4 +1,4 @@
-package ovo.sypw.androidendproject.ui.screens.python
+package ovo.sypw.androidendproject.ui.screens.home.python
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

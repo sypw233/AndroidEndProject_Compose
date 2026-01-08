@@ -47,7 +47,6 @@ fun MeScreen(
     onSettingsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier

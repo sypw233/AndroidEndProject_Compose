@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
 import ovo.sypw.androidendproject.data.model.Banner
 import ovo.sypw.androidendproject.data.model.News
 import ovo.sypw.androidendproject.data.remote.ApiService
@@ -30,10 +31,7 @@ class NewsRepository(
     private val context: Context
 ) {
     private val gson = Gson()
-    private val prefs = context.getSharedPreferences("news_cache", Context.MODE_PRIVATE)
-    private val CACHE_KEY = "cached_news_list"
-    private val CACHE_TIME_KEY = "cache_time"
-    private val CACHE_DURATION = 2 * 60 * 1000L // 2 minutes for RSS
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     // 内存缓存
     private var cachedNews = mutableListOf<News>()
@@ -52,43 +50,14 @@ class NewsRepository(
             if (cachedNews.isEmpty() || isCacheExpired()) {
                 fetchAndParseRss()
             }
-
-            // 分页逻辑
-            val total = cachedNews.size
-            val fromIndex = (page - 1) * pageSize
-            val toIndex = minOf(fromIndex + pageSize, total)
-
-            if (fromIndex >= total) {
-                emit(Result.success(NewsListData(emptyList(), emptyList(), false)))
-            } else {
-                val pageData = cachedNews.subList(fromIndex, toIndex).toList()
-                emit(
-                    Result.success(
-                        NewsListData(
-                            banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
-                            news = pageData,
-                            hasMore = toIndex < total
-                        )
-                    )
-                )
-            }
+            emit(Result.success(getPageData(page, pageSize)))
         } catch (e: Exception) {
             e.printStackTrace()
-            // 失败时使用缓存数据
+            // 失败时尝试使用缓存数据
             if (cachedNews.isNotEmpty()) {
-                val total = cachedNews.size
-                val fromIndex = (page - 1) * pageSize
-                if (fromIndex < total) {
-                    val toIndex = minOf(fromIndex + pageSize, total)
-                    emit(
-                        Result.success(
-                            NewsListData(
-                                banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
-                                news = cachedNews.subList(fromIndex, toIndex).toList(),
-                                hasMore = toIndex < total
-                            )
-                        )
-                    )
+                val pageData = getPageData(page, pageSize)
+                if (pageData.news.isNotEmpty()) {
+                    emit(Result.success(pageData))
                     return@flow
                 }
             }
@@ -105,12 +74,9 @@ class NewsRepository(
             val oldIds = cachedNews.map { it.id }.toSet()
 
             // 获取新数据
-            val responseBody = apiService.getRssFeed("https://www.ithome.com/rss/")
-            val xmlString = responseBody.string()
-            val newlyParsedNews = parseRss(xmlString)
+            val newlyParsedNews = fetchRssData()
 
             if (newlyParsedNews.isEmpty()) {
-                // RSS 返回空，使用缓存
                 emit(
                     Result.success(
                         RefreshResultData(
@@ -122,19 +88,11 @@ class NewsRepository(
                 return@flow
             }
 
-            // 计算新增条目数（在旧数据中不存在的）
-            val newItems = newlyParsedNews.filter { it.id !in oldIds }
-            val newItemsCount = newItems.size
+            // 计算新增条目数
+            val newItemsCount = newlyParsedNews.count { it.id !in oldIds }
 
-            // 合并数据：新数据在前，旧数据中不重复的在后
-            val newIds = newlyParsedNews.map { it.id }.toSet()
-            val oldUniqueNews = cachedNews.filter { it.id !in newIds }
-            val mergedNews = newlyParsedNews + oldUniqueNews
-
-            // 更新缓存
-            cachedNews.clear()
-            cachedNews.addAll(mergedNews)
-            saveCacheToDisk()
+            // 合并并保存数据
+            mergeAndSaveNews(newlyParsedNews)
 
             emit(
                 Result.success(
@@ -150,15 +108,25 @@ class NewsRepository(
         }
     }
 
-    private fun getFirstPageData(pageSize: Int): NewsListData {
+    private fun getPageData(page: Int, pageSize: Int): NewsListData {
         val total = cachedNews.size
-        val toIndex = minOf(pageSize, total)
+        val fromIndex = (page - 1) * pageSize
+        
+        if (fromIndex >= total) {
+            return NewsListData(emptyList(), emptyList(), false)
+        }
+        
+        val toIndex = minOf(fromIndex + pageSize, total)
+        val pageData = cachedNews.subList(fromIndex, toIndex).toList()
+        
         return NewsListData(
-            banners = getBannersFromNews(cachedNews),
-            news = if (total > 0) cachedNews.subList(0, toIndex).toList() else emptyList(),
+            banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
+            news = pageData,
             hasMore = toIndex < total
         )
     }
+
+    private fun getFirstPageData(pageSize: Int) = getPageData(1, pageSize)
 
     private fun isCacheExpired(): Boolean {
         val cacheTime = prefs.getLong(CACHE_TIME_KEY, 0L)
@@ -205,26 +173,32 @@ class NewsRepository(
     }
 
     private suspend fun fetchAndParseRss() {
-        val responseBody = apiService.getRssFeed("https://www.ithome.com/rss/")
-        val xmlString = responseBody.string()
-        val parsedNews = parseRss(xmlString)
+        val parsedNews = fetchRssData()
         if (parsedNews.isNotEmpty()) {
-            // 合并新旧数据
-            val existingIds = cachedNews.map { it.id }.toSet()
-            val newIds = parsedNews.map { it.id }.toSet()
-            val oldUniqueNews = cachedNews.filter { it.id !in newIds }
-
-            cachedNews.clear()
-            cachedNews.addAll(parsedNews)
-            cachedNews.addAll(oldUniqueNews)
-            saveCacheToDisk()
+            mergeAndSaveNews(parsedNews)
         }
+    }
+    
+    private suspend fun fetchRssData(): List<News> {
+        val responseBody = apiService.getRssFeed(RSS_URL)
+        val xmlString = responseBody.string()
+        return parseRss(xmlString)
+    }
+
+    private fun mergeAndSaveNews(newNews: List<News>) {
+        val newIds = newNews.map { it.id }.toSet()
+        val oldUniqueNews = cachedNews.filter { it.id !in newIds }
+
+        cachedNews.clear()
+        cachedNews.addAll(newNews)
+        cachedNews.addAll(oldUniqueNews)
+        saveCacheToDisk()
     }
 
     private suspend fun parseRss(xml: String): List<News> = withContext(Dispatchers.IO) {
         val newsList = mutableListOf<News>()
         try {
-            val factory = org.xmlpull.v1.XmlPullParserFactory.newInstance()
+            val factory = XmlPullParserFactory.newInstance()
             val parser = factory.newPullParser()
             parser.setInput(StringReader(xml))
 
@@ -328,5 +302,13 @@ class NewsRepository(
             news = mockNews,
             hasMore = page < 5
         )
+    }
+
+    companion object {
+        private const val PREFS_NAME = "news_cache"
+        private const val CACHE_KEY = "cached_news_list"
+        private const val CACHE_TIME_KEY = "cache_time"
+        private const val CACHE_DURATION = 2 * 60 * 1000L // 2 minutes
+        private const val RSS_URL = "https://www.ithome.com/rss/"
     }
 }

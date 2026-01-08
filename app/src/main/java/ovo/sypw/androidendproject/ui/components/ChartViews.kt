@@ -42,13 +42,10 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import me.bytebeats.views.charts.pie.PieChart
-import me.bytebeats.views.charts.pie.PieChartData
-import me.bytebeats.views.charts.pie.render.SimpleSliceDrawer
+import kotlin.math.roundToInt
 import ovo.sypw.androidendproject.data.model.BarChartData as AppBarChartData
 import ovo.sypw.androidendproject.data.model.LineChartData as AppLineChartData
 import ovo.sypw.androidendproject.data.model.PieChartData as AppPieChartData
-import kotlin.math.roundToInt
 
 /**
  * 自定义可交互折线图
@@ -65,7 +62,7 @@ fun AppLineChart(
 
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var animationProgress by remember { mutableFloatStateOf(0f) }
-    
+
     val animatedProgress by animateFloatAsState(
         targetValue = animationProgress,
         animationSpec = tween(durationMillis = 800),
@@ -78,11 +75,10 @@ fun AppLineChart(
 
     val values = data.values
     val labels = data.labels
-    
+
     if (values.isEmpty()) return
 
     val maxValue = values.maxOrNull() ?: 0f
-    val minValue = 0f
     val range = if (maxValue > 0) maxValue * 1.1f else 1f
     val avgValue = values.average().toFloat()
 
@@ -163,7 +159,8 @@ fun AppLineChart(
                         val chartWidth = size.width.toFloat()
                         val padding = 50f
                         val availableWidth = chartWidth - padding * 2
-                        val pointSpacing = if (values.size > 1) availableWidth / (values.size - 1) else availableWidth
+                        val pointSpacing =
+                            if (values.size > 1) availableWidth / (values.size - 1) else availableWidth
                         val clickedIndex = ((offset.x - padding) / pointSpacing).roundToInt()
                             .coerceIn(0, values.size - 1)
                         selectedIndex = if (selectedIndex == clickedIndex) -1 else clickedIndex
@@ -178,7 +175,8 @@ fun AppLineChart(
             val bottomPadding = 35f
             val availableWidth = chartWidth - padding * 2
             val availableHeight = chartHeight - topPadding - bottomPadding
-            val pointSpacing = if (values.size > 1) availableWidth / (values.size - 1) else availableWidth
+            val pointSpacing =
+                if (values.size > 1) availableWidth / (values.size - 1) else availableWidth
 
             // Y轴刻度
             for (i in 0..4) {
@@ -260,8 +258,16 @@ fun AppLineChart(
                     radius = if (isSelected) 14f else 10f,
                     center = point
                 )
-                drawCircle(color = surfaceColor, radius = if (isSelected) 8f else 6f, center = point)
-                drawCircle(color = primaryColor, radius = if (isSelected) 5f else 3f, center = point)
+                drawCircle(
+                    color = surfaceColor,
+                    radius = if (isSelected) 8f else 6f,
+                    center = point
+                )
+                drawCircle(
+                    color = primaryColor,
+                    radius = if (isSelected) 5f else 3f,
+                    center = point
+                )
             }
 
             // X轴标签
@@ -293,12 +299,12 @@ fun AppBarChart(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.tertiary
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    MaterialTheme.colorScheme.surface
     val outlineColor = MaterialTheme.colorScheme.outline
 
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var animationProgress by remember { mutableFloatStateOf(0f) }
-    
+
     val animatedProgress by animateFloatAsState(
         targetValue = animationProgress,
         animationSpec = tween(durationMillis = 600),
@@ -368,7 +374,13 @@ fun AppBarChart(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "投币: ${formatLargeNumber(values2?.getOrNull(selectedIndex) ?: 0f)}千",
+                                    text = "投币: ${
+                                        formatLargeNumber(
+                                            values2?.getOrNull(
+                                                selectedIndex
+                                            ) ?: 0f
+                                        )
+                                    }千",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -384,11 +396,19 @@ fun AppBarChart(
                 modifier = Modifier.padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.size(14.dp).background(primaryColor, RoundedCornerShape(3.dp)))
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .background(primaryColor, RoundedCornerShape(3.dp))
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("点赞", style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.width(20.dp))
-                Box(modifier = Modifier.size(14.dp).background(secondaryColor, RoundedCornerShape(3.dp)))
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .background(secondaryColor, RoundedCornerShape(3.dp))
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("投币", style = MaterialTheme.typography.labelMedium)
             }
@@ -448,7 +468,7 @@ fun AppBarChart(
             values1.forEachIndexed { index, value1 ->
                 val isSelected = index == selectedIndex
                 val x = padding + index * barGroupWidth + gap
-                
+
                 // 第一组柱子
                 val height1 = (value1 / maxValue) * availableHeight * animatedProgress
                 val barColor1 = if (isSelected) primaryColor else primaryColor.copy(alpha = 0.85f)
@@ -463,7 +483,8 @@ fun AppBarChart(
                 if (hasTwoGroups) {
                     val value2 = values2.getOrElse(index) { 0f }
                     val height2 = (value2 / maxValue) * availableHeight * animatedProgress
-                    val barColor2 = if (isSelected) secondaryColor else secondaryColor.copy(alpha = 0.85f)
+                    val barColor2 =
+                        if (isSelected) secondaryColor else secondaryColor.copy(alpha = 0.85f)
                     drawRoundRect(
                         color = barColor2,
                         topLeft = Offset(x + barWidth + 4f, topPadding + availableHeight - height2),
@@ -526,7 +547,7 @@ fun AppPieChart(
     if (items.isEmpty()) return
 
     var internalSelectedIndex by remember { mutableIntStateOf(selectedIndex) }
-    
+
     // 同步外部选中状态
     LaunchedEffect(selectedIndex) {
         internalSelectedIndex = selectedIndex
@@ -593,24 +614,25 @@ fun AppPieChart(
                         val centerX = size.width / 2f
                         val centerY = size.height / 2f
                         val radius = minOf(centerX, centerY) * 0.8f
-                        
+
                         // 计算点击位置相对于中心的角度
                         val dx = offset.x - centerX
                         val dy = offset.y - centerY
                         val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                        
+
                         // 检查是否在饼图范围内
                         if (distance <= radius && distance >= radius * 0.3f) {
                             var angle = kotlin.math.atan2(dy, dx) * 180f / kotlin.math.PI.toFloat()
                             angle = (angle + 360f) % 360f  // 转换为正角度
                             angle = (angle + 90f) % 360f   // 从顶部开始
-                            
+
                             // 找到点击的扇形
                             var currentAngle = 0f
                             for (i in items.indices) {
                                 val sweepAngle = items[i].value / total * 360f
                                 if (angle >= currentAngle && angle < currentAngle + sweepAngle) {
-                                    internalSelectedIndex = if (internalSelectedIndex == i) -1 else i
+                                    internalSelectedIndex =
+                                        if (internalSelectedIndex == i) -1 else i
                                     onSliceClick?.invoke(i)
                                     break
                                 }
@@ -630,7 +652,7 @@ fun AppPieChart(
             val innerRadius = radius * 0.5f
 
             var startAngle = -90f  // 从顶部开始
-            
+
             items.forEachIndexed { index, item ->
                 val sweepAngle = item.value / total * 360f
                 val isSelected = index == internalSelectedIndex
@@ -639,7 +661,7 @@ fun AppPieChart(
 
                 // 绘制扇形
                 drawArc(
-                    color = Color(item.color).let { 
+                    color = Color(item.color).let {
                         if (isSelected) it else it.copy(alpha = 0.9f)
                     },
                     startAngle = startAngle,
@@ -648,7 +670,7 @@ fun AppPieChart(
                     topLeft = Offset(centerX - actualRadius, centerY - actualRadius),
                     size = Size(actualRadius * 2, actualRadius * 2)
                 )
-                
+
                 // 绘制边框
                 drawArc(
                     color = Color.White,

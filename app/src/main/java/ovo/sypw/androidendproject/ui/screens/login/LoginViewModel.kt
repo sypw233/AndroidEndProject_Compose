@@ -35,17 +35,26 @@ class LoginViewModel(
             _uiState.value = LoginUiState.Loading
             Log.d(TAG, "signInWithEmail: 调用 userRepository.signInWithEmail")
             val result = userRepository.signInWithEmail(email, password)
-            Log.d(TAG, "signInWithEmail: 收到结果, isSuccess=${result.isSuccess}, isFailure=${result.isFailure}")
+            Log.d(
+                TAG,
+                "signInWithEmail: 收到结果, isSuccess=${result.isSuccess}, isFailure=${result.isFailure}"
+            )
             result.fold(
                 onSuccess = { authResult ->
                     val user = authResult.user
-                    Log.d(TAG, "signInWithEmail: onSuccess, user=${user?.uid}, isEmailVerified=${user?.isEmailVerified}")
+                    Log.d(
+                        TAG,
+                        "signInWithEmail: onSuccess, user=${user?.uid}, isEmailVerified=${user?.isEmailVerified}"
+                    )
                     if (user != null) {
                         // 检查邮箱是否已验证
                         if (user.isEmailVerified) {
                             Log.d(TAG, "signInWithEmail: 邮箱已验证, 设置状态为 Success")
                             _uiState.value = LoginUiState.Success(user)
-                            Log.d(TAG, "signInWithEmail: 状态已设置为 Success, 当前状态=${_uiState.value}")
+                            Log.d(
+                                TAG,
+                                "signInWithEmail: 状态已设置为 Success, 当前状态=${_uiState.value}"
+                            )
                         } else {
                             Log.d(TAG, "signInWithEmail: 邮箱未验证, 登出并设置错误状态")
                             // 邮箱未验证，登出并提示
@@ -79,13 +88,19 @@ class LoginViewModel(
             _uiState.value = LoginUiState.Loading
             Log.d(TAG, "signUpWithEmail: 调用 userRepository.signUpWithEmail")
             val result = userRepository.signUpWithEmail(email, password, displayName)
-            Log.d(TAG, "signUpWithEmail: 收到结果, isSuccess=${result.isSuccess}, isFailure=${result.isFailure}")
+            Log.d(
+                TAG,
+                "signUpWithEmail: 收到结果, isSuccess=${result.isSuccess}, isFailure=${result.isFailure}"
+            )
             result.fold(
                 onSuccess = { _ ->
                     Log.d(TAG, "signUpWithEmail: onSuccess, 设置状态为 VerificationRequired")
                     // 注册成功，提示用户验证邮箱
                     _uiState.value = LoginUiState.VerificationRequired
-                    Log.d(TAG, "signUpWithEmail: 状态已设置为 VerificationRequired, 当前状态=${_uiState.value}")
+                    Log.d(
+                        TAG,
+                        "signUpWithEmail: 状态已设置为 VerificationRequired, 当前状态=${_uiState.value}"
+                    )
                 },
                 onFailure = { e ->
                     Log.e(TAG, "signUpWithEmail: onFailure", e)
@@ -107,7 +122,10 @@ class LoginViewModel(
                     val credential = GoogleAuthProvider.getCredential(idToken, null)
                     Log.d(TAG, "signInWithGoogle: 调用 userRepository.signInWithCredential")
                     val result = userRepository.signInWithCredential(credential)
-                    Log.d(TAG, "signInWithGoogle: 收到结果, isSuccess=${result.isSuccess}, isFailure=${result.isFailure}")
+                    Log.d(
+                        TAG,
+                        "signInWithGoogle: 收到结果, isSuccess=${result.isSuccess}, isFailure=${result.isFailure}"
+                    )
                     result.fold(
                         onSuccess = { authResult ->
                             val user = authResult.user
@@ -115,7 +133,10 @@ class LoginViewModel(
                             if (user != null) {
                                 Log.d(TAG, "signInWithGoogle: 设置状态为 Success")
                                 _uiState.value = LoginUiState.Success(user)
-                                Log.d(TAG, "signInWithGoogle: 状态已设置为 Success, 当前状态=${_uiState.value}")
+                                Log.d(
+                                    TAG,
+                                    "signInWithGoogle: 状态已设置为 Success, 当前状态=${_uiState.value}"
+                                )
                             } else {
                                 Log.w(TAG, "signInWithGoogle: 用户信息为空")
                                 _uiState.value = LoginUiState.Error("Google 登录失败：用户信息为空")
@@ -136,7 +157,7 @@ class LoginViewModel(
             }
         }
     }
-    
+
     fun resetState() {
         Log.d(TAG, "resetState: 重置状态为 Idle")
         _uiState.value = LoginUiState.Idle
