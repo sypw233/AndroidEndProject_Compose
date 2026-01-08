@@ -117,6 +117,9 @@ dependencies {
     // Google Ads
     implementation(libs.play.services.ads)
 
+    // WebView
+    implementation(libs.compose.webview)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

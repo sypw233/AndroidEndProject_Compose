@@ -1,11 +1,8 @@
 package ovo.sypw.androidendproject.ui.screens.web
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
-import android.view.View
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,28 +18,32 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.viewinterop.AndroidView
+import com.kevinnzou.web.LoadingState
+import com.kevinnzou.web.WebView
+import com.kevinnzou.web.rememberWebViewNavigator
+import com.kevinnzou.web.rememberWebViewState
 
 /**
- * 通用 WebView 页面 - 可复用于打开任何链接
+ * 通用 WebView 页面 - 使用 compose-webview 库
  *
  * @param url 要打开的网页 URL
  * @param title 页面标题（可选，为空时从网页获取）
  * @param onBack 关闭页面回调
  */
+@SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebViewScreen(
@@ -50,26 +51,25 @@ fun WebViewScreen(
     title: String = "",
     onBack: () -> Unit
 ) {
-    var isLoading by remember { mutableStateOf(true) }
-    var progress by remember { mutableFloatStateOf(0f) }
-    var pageTitle by remember { mutableStateOf(title) }
-    var canGoBack by remember { mutableStateOf(false) }
-    var canGoForward by remember { mutableStateOf(false) }
-    var webViewRef by remember { mutableStateOf<WebView?>(null) }
-    var currentUrl by remember { mutableStateOf(url) }
     val context = LocalContext.current
+    val state = rememberWebViewState(url = url)
+    val navigator = rememberWebViewNavigator()
+    
+    var pageTitle by remember { mutableStateOf(title) }
 
-    // 处理系统返回键
-    BackHandler(enabled = canGoBack) {
-        webViewRef?.goBack()
-    }
-
-    // 清理 WebView
-    DisposableEffect(Unit) {
-        onDispose {
-            webViewRef?.destroy()
+    // 监听页面标题变化
+    LaunchedEffect(state.pageTitle) {
+        if (title.isEmpty() && !state.pageTitle.isNullOrEmpty()) {
+            pageTitle = state.pageTitle ?: ""
         }
     }
+
+    // 处理系统返回键
+    BackHandler(enabled = navigator.canGoBack) {
+        navigator.navigateBack()
+    }
+
+    val loadingState = state.loadingState
 
     Scaffold(
         topBar = {
@@ -89,43 +89,39 @@ fun WebViewScreen(
                 actions = {
                     // 后退按钮
                     IconButton(
-                        onClick = { webViewRef?.goBack() },
-                        enabled = canGoBack
+                        onClick = { navigator.navigateBack() },
+                        enabled = navigator.canGoBack
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "后退",
-                            tint = if (canGoBack)
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            tint = if (navigator.canGoBack)
+                                MaterialTheme.colorScheme.onSurface
                             else
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.38f
-                                )
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
                     // 前进按钮
                     IconButton(
-                        onClick = { webViewRef?.goForward() },
-                        enabled = canGoForward
+                        onClick = { navigator.navigateForward() },
+                        enabled = navigator.canGoForward
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "前进",
-                            tint = if (canGoForward)
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            tint = if (navigator.canGoForward)
+                                MaterialTheme.colorScheme.onSurface
                             else
-                                androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.38f
-                                )
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
                     // 刷新按钮
-                    IconButton(onClick = { webViewRef?.reload() }) {
+                    IconButton(onClick = { navigator.reload() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "刷新")
                     }
                     // 在浏览器中打开
                     IconButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(currentUrl))
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(state.lastLoadedUrl ?: url))
                         context.startActivity(intent)
                     }) {
                         Icon(Icons.Default.OpenInBrowser, contentDescription = "在浏览器中打开")
@@ -139,112 +135,35 @@ fun WebViewScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            AndroidView(
-                factory = { context ->
-                    WebView(context).apply {
-                        webViewRef = this
-
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.loadWithOverviewMode = true
-                        settings.useWideViewPort = true
-                        settings.builtInZoomControls = true
-                        settings.displayZoomControls = false
-                        settings.setSupportZoom(true)
-
-                        // 增强设置 - 提高兼容性
-                        settings.javaScriptCanOpenWindowsAutomatically = true
-                        settings.mediaPlaybackRequiresUserGesture = false
-                        settings.allowFileAccess = true
-                        settings.allowContentAccess = true
-                        settings.databaseEnabled = true
-                        settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-                        settings.mixedContentMode =
-                            android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-
-                        // 启用硬件加速（WebGL 需要）
-                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-                        // 设置移动端 User-Agent（模拟手机浏览器）
-                        settings.userAgentString =
-                            "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-
-                        webViewClient = object : WebViewClient() {
-                            override fun shouldOverrideUrlLoading(
-                                view: WebView?,
-                                request: android.webkit.WebResourceRequest?
-                            ): Boolean {
-                                val requestUrl = request?.url?.toString() ?: return false
-                                // 拦截非 http/https 协议（如 bilibili://, intent:// 等）
-                                if (!requestUrl.startsWith("http://") && !requestUrl.startsWith("https://")) {
-                                    // 阻止跳转到自定义协议
-                                    return true
-                                }
-                                // 允许 http/https 链接在 WebView 内加载
-                                return false
-                            }
-
-                            override fun onPageStarted(
-                                view: WebView?,
-                                url: String?,
-                                favicon: Bitmap?
-                            ) {
-                                super.onPageStarted(view, url, favicon)
-                                isLoading = true
-                            }
-
-                            override fun onPageFinished(view: WebView?, finishedUrl: String?) {
-                                super.onPageFinished(view, finishedUrl)
-                                isLoading = false
-                                // 更新当前 URL
-                                currentUrl = finishedUrl ?: url
-                                // 更新导航状态
-                                canGoBack = view?.canGoBack() == true
-                                canGoForward = view?.canGoForward() == true
-                                // 如果没有传入标题，使用网页标题
-                                if (title.isEmpty()) {
-                                    pageTitle = view?.title ?: ""
-                                }
-                            }
-
-                            override fun doUpdateVisitedHistory(
-                                view: WebView?,
-                                historyUrl: String?,
-                                isReload: Boolean
-                            ) {
-                                super.doUpdateVisitedHistory(view, historyUrl, isReload)
-                                // 更新当前 URL
-                                if (historyUrl != null) {
-                                    currentUrl = historyUrl
-                                }
-                                // 每次导航变化时更新状态
-                                canGoBack = view?.canGoBack() == true
-                                canGoForward = view?.canGoForward() == true
-                            }
-                        }
-
-                        webChromeClient = object : android.webkit.WebChromeClient() {
-                            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                progress = newProgress / 100f
-                            }
-
-                            override fun onReceivedTitle(view: WebView?, webTitle: String?) {
-                                super.onReceivedTitle(view, webTitle)
-                                if (title.isEmpty() && !webTitle.isNullOrEmpty()) {
-                                    pageTitle = webTitle
-                                }
-                            }
-                        }
-
-                        loadUrl(url)
+            WebView(
+                state = state,
+                navigator = navigator,
+                modifier = Modifier.fillMaxSize(),
+                onCreated = { webView ->
+                    webView.settings.apply {
+                        javaScriptEnabled = true
+                        domStorageEnabled = true
+                        loadWithOverviewMode = true
+                        useWideViewPort = true
+                        builtInZoomControls = true
+                        displayZoomControls = false
+                        setSupportZoom(true)
+                        javaScriptCanOpenWindowsAutomatically = true
+                        mediaPlaybackRequiresUserGesture = false
+                        allowFileAccess = true
+                        allowContentAccess = true
+                        cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                        mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                        userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
                     }
-                },
-                modifier = Modifier.fillMaxSize()
+                    webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+                }
             )
 
-            if (isLoading) {
+            // 显示加载进度
+            if (loadingState is LoadingState.Loading) {
                 LinearProgressIndicator(
-                    progress = { progress },
+                    progress = { loadingState.progress },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

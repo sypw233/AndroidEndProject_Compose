@@ -47,6 +47,9 @@ baiduMap = "7.6.6"
 # Google Ads
 playServicesAds = "24.9.0"
 
+# WebView
+composeWebview = "0.33.6"
+
 # Test
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -127,6 +130,9 @@ baidu-map-util = { group = "com.baidu.lbsyun", name = "BaiduMapSDK_Util", versio
 
 # Google Ads
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+
+# WebView
+compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version.ref = "composeWebview" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
