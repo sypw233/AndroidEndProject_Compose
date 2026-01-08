@@ -1,15 +1,14 @@
 package ovo.sypw.androidendproject.data.repository
 
-import android.content.Context
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
-import ovo.sypw.androidendproject.data.model.User
 import ovo.sypw.androidendproject.data.remote.FirebaseWrapper
-import ovo.sypw.androidendproject.ui.activity.FirebaseUILoginActivity
 
 /**
  * 用户仓库
- * 提供用户认证相关功能，使用 FirebaseUI 进行登录
+ * 提供用户认证相关功能
  */
 class UserRepository {
 
@@ -18,27 +17,24 @@ class UserRepository {
 
     fun authStateFlow(): Flow<FirebaseUser?> = FirebaseWrapper.authStateFlow()
 
-    /**
-     * 创建启动 FirebaseUI 登录的 Intent
-     */
-    fun createSignInIntent(context: Context) = FirebaseUILoginActivity.createIntent(context)
-
-    /**
-     * 登出
-     */
-    suspend fun signOut(context: Context) {
-        FirebaseWrapper.signOut(context)
+    suspend fun signInWithEmail(email: String, password: String): Result<AuthResult> {
+        return FirebaseWrapper.signInWithEmail(email, password)
     }
 
-    /**
-     * 删除账号
-     */
-    suspend fun deleteAccount(context: Context): Result<Unit> {
-        return FirebaseWrapper.deleteAccount(context)
+    suspend fun signUpWithEmail(email: String, password: String, displayName: String): Result<AuthResult> {
+        return FirebaseWrapper.signUpWithEmail(email, password, displayName)
     }
 
-    suspend fun getUserInfo(uid: String): Result<User> {
-        return FirebaseWrapper.getUserInfo(uid)
+    suspend fun signInWithCredential(credential: AuthCredential): Result<AuthResult> {
+        return FirebaseWrapper.signInWithCredential(credential)
+    }
+
+    fun signOut() {
+        FirebaseWrapper.signOut()
+    }
+
+    suspend fun deleteAccount(): Result<Unit> {
+        return FirebaseWrapper.deleteAccount()
     }
 
     fun isLoggedIn(): Boolean = currentUser != null

@@ -44,10 +44,7 @@
         </activity>
 
         <!-- FirebaseUI 登录 Activity -->
-        <activity
-            android:name=".ui.activity.FirebaseUILoginActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AndroidEndProject_Compose" />
+
 
     </application>
 

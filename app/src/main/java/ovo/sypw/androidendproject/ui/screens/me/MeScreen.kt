@@ -63,7 +63,7 @@ fun MeScreen(
             is MeUiState.LoggedIn -> {
                 UserInfoCard(
                     user = state.user,
-                    onLogout = { viewModel.logout(context) }
+                    onLogout = { viewModel.logout() }
                 )
             }
 
@@ -91,7 +91,7 @@ fun MeScreen(
         // 退出登录按钮（仅登录状态显示）
         if (uiState is MeUiState.LoggedIn) {
             TextButton(
-                onClick = { viewModel.logout(context) },
+                onClick = { viewModel.logout() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)

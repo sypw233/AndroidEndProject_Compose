@@ -25,22 +25,13 @@ class MeViewModel(
         viewModelScope.launch {
             userRepository.authStateFlow().collect { firebaseUser ->
                 if (firebaseUser != null) {
-                    val result = userRepository.getUserInfo(firebaseUser.uid)
-                    result.fold(
-                        onSuccess = { user ->
-                            _uiState.value = MeUiState.LoggedIn(user)
-                        },
-                        onFailure = {
-                            // 如果获取用户信息失败，使用 Firebase 用户基本信息
-                            _uiState.value = MeUiState.LoggedIn(
-                                User(
-                                    uid = firebaseUser.uid,
-                                    email = firebaseUser.email ?: "",
-                                    displayName = firebaseUser.displayName,
-                                    avatarUrl = firebaseUser.photoUrl?.toString()
-                                )
-                            )
-                        }
+                    _uiState.value = MeUiState.LoggedIn(
+                        User(
+                            uid = firebaseUser.uid,
+                            email = firebaseUser.email ?: "",
+                            displayName = firebaseUser.displayName,
+                            avatarUrl = firebaseUser.photoUrl?.toString()
+                        )
                     )
                 } else {
                     _uiState.value = MeUiState.NotLoggedIn
@@ -53,10 +44,9 @@ class MeViewModel(
      * 退出登录
      * 使用 FirebaseUI 的 AuthUI.signOut() 方法
      */
-    fun logout(context: Context) {
+    fun logout() {
         viewModelScope.launch {
-            userRepository.signOut(context)
-            // authStateFlow 会自动更新状态
+            userRepository.signOut()
         }
     }
 }

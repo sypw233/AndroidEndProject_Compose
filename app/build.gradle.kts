@@ -95,7 +95,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.ui.auth)
+    implementation(libs.play.services.auth)
 
     // Accompanist
     implementation(libs.accompanist.pager)
