@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import ovo.sypw.androidendproject.data.model.BarChartData
+import ovo.sypw.androidendproject.data.model.BilibiliRankingItem
 import ovo.sypw.androidendproject.data.model.LineChartData
 import ovo.sypw.androidendproject.data.model.PieChartData
 import ovo.sypw.androidendproject.data.repository.ChartRepository
@@ -28,6 +29,9 @@ class ChartViewModel(
     private val _pieChartData = MutableStateFlow<PieChartData?>(null)
     val pieChartData: StateFlow<PieChartData?> = _pieChartData.asStateFlow()
 
+    private val _rankingList = MutableStateFlow<List<BilibiliRankingItem>>(emptyList())
+    val rankingList: StateFlow<List<BilibiliRankingItem>> = _rankingList.asStateFlow()
+
     init {
         loadData()
     }
@@ -36,7 +40,19 @@ class ChartViewModel(
         viewModelScope.launch {
             _uiState.value = ChartUiState.Loading
 
-            // 加载折线图数据
+            // 先加载排行榜原始数据
+            chartRepository.getBilibiliRankingData()
+                .catch { }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { _rankingList.value = it },
+                        onFailure = { }
+                    )
+                }
+        }
+
+        // 加载折线图数据
+        viewModelScope.launch {
             chartRepository.getLineChartData()
                 .catch { }
                 .collect { result ->
@@ -47,6 +63,7 @@ class ChartViewModel(
                 }
         }
 
+        // 加载柱状图数据
         viewModelScope.launch {
             chartRepository.getBarChartData()
                 .catch { }
@@ -58,9 +75,12 @@ class ChartViewModel(
                 }
         }
 
+        // 加载饼图数据（最后完成时更新 UI 状态）
         viewModelScope.launch {
             chartRepository.getPieChartData()
-                .catch { }
+                .catch { e ->
+                    _uiState.value = ChartUiState.Error(e.message ?: "加载失败")
+                }
                 .collect { result ->
                     result.fold(
                         onSuccess = {
@@ -68,7 +88,8 @@ class ChartViewModel(
                             _uiState.value = ChartUiState.Success(
                                 lineChartData = _lineChartData.value,
                                 barChartData = _barChartData.value,
-                                pieChartData = it
+                                pieChartData = it,
+                                rankingList = _rankingList.value
                             )
                         },
                         onFailure = { e ->

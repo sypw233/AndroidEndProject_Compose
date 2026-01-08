@@ -2,11 +2,14 @@ package ovo.sypw.androidendproject.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 object PreferenceUtils {
     private const val PREF_NAME = "app_preferences"
     private const val KEY_FIRST_LAUNCH = "first_launch"
     private const val KEY_USE_GOOGLE_AD = "use_google_ad"
+    private const val KEY_BILIBILI_COOKIES = "bilibili_cookies"
+
 
     private fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -17,7 +20,7 @@ object PreferenceUtils {
     }
 
     fun setFirstLaunch(context: Context, isFirst: Boolean) {
-        getPreferences(context).edit().putBoolean(KEY_FIRST_LAUNCH, isFirst).apply()
+        getPreferences(context).edit { putBoolean(KEY_FIRST_LAUNCH, isFirst) }
     }
 
     /**
@@ -30,7 +33,7 @@ object PreferenceUtils {
     }
 
     fun setUseGoogleAd(context: Context, useGoogle: Boolean) {
-        getPreferences(context).edit().putBoolean(KEY_USE_GOOGLE_AD, useGoogle).apply()
+        getPreferences(context).edit { putBoolean(KEY_USE_GOOGLE_AD, useGoogle) }
     }
 
     fun getString(context: Context, key: String, defaultValue: String = ""): String {
@@ -51,6 +54,20 @@ object PreferenceUtils {
 
     fun clear(context: Context) {
         getPreferences(context).edit().clear().apply()
+    }
+
+    /**
+     * 获取 B站 Cookies
+     */
+    fun getBilibiliCookies(context: Context): String {
+        return getPreferences(context).getString(KEY_BILIBILI_COOKIES, "") ?: ""
+    }
+
+    /**
+     * 设置 B站 Cookies
+     */
+    fun setBilibiliCookies(context: Context, cookies: String) {
+        getPreferences(context).edit { putString(KEY_BILIBILI_COOKIES, cookies) }
     }
 }
 

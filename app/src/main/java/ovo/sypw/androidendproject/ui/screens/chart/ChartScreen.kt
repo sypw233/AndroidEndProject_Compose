@@ -8,17 +8,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,11 +39,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
+import ovo.sypw.androidendproject.data.model.BilibiliRankingItem
 import ovo.sypw.androidendproject.data.model.PieChartItem
 import ovo.sypw.androidendproject.ui.components.AppBarChart
 import ovo.sypw.androidendproject.ui.components.AppLineChart
@@ -46,14 +57,17 @@ import ovo.sypw.androidendproject.ui.components.LoadingIndicator
 import ovo.sypw.androidendproject.ui.components.SpeedDialFab
 
 @Composable
-fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
+fun ChartScreen(
+    viewModel: ChartViewModel = koinViewModel(),
+    onVideoClick: ((BilibiliRankingItem) -> Unit)? = null
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lineChartData by viewModel.lineChartData.collectAsStateWithLifecycle()
     val barChartData by viewModel.barChartData.collectAsStateWithLifecycle()
     val pieChartData by viewModel.pieChartData.collectAsStateWithLifecycle()
+    val rankingList by viewModel.rankingList.collectAsStateWithLifecycle()
 
     var selectedChartType by remember { mutableStateOf(ChartType.LINE) }
-    // 饼图选中的扇形索引 (-1 表示未选中)
     var selectedPieIndex by remember { mutableIntStateOf(-1) }
 
     Scaffold(
@@ -61,7 +75,7 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
             SpeedDialFab(
                 onChartTypeSelected = { chartType ->
                     selectedChartType = chartType
-                    selectedPieIndex = -1 // 切换图表时重置选中状态
+                    selectedPieIndex = -1
                 }
             )
         }
@@ -72,97 +86,128 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
             }
 
             is ChartUiState.Success -> {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp)
                 ) {
                     // 标题
-                    Text(
-                        text = when (selectedChartType) {
-                            ChartType.LINE -> lineChartData?.title ?: "折线图"
-                            ChartType.BAR -> barChartData?.title ?: "柱状图"
-                            ChartType.PIE -> pieChartData?.title ?: "饼图"
-                        },
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = when (selectedChartType) {
+                                ChartType.LINE -> lineChartData?.title ?: "B站排行榜数据"
+                                ChartType.BAR -> barChartData?.title ?: "互动数据对比"
+                                ChartType.PIE -> pieChartData?.title ?: "分区分布"
+                            },
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // 图表内容区域
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        when (selectedChartType) {
-                            ChartType.LINE -> {
-                                lineChartData?.let { data ->
-                                    Column {
-                                        AppLineChart(data = data)
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        ChartLegend(
-                                            description = "Java工程师经验与工资的对应情况",
-                                            labels = data.labels,
-                                            values = data.values.map { "${it.toInt()}元" }
-                                        )
-                                    }
-                                }
-                            }
-
-                            ChartType.BAR -> {
-                                barChartData?.let { data ->
-                                    Column {
-                                        AppBarChart(data = data)
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        ChartLegend(
-                                            description = "Java/PHP工程师经验与工资的对应情况",
-                                            labels = data.labels,
-                                            values = data.values.map { "${it.toInt()}元" }
-                                        )
-                                    }
-                                }
-                            }
-
-                            ChartType.PIE -> {
-                                pieChartData?.let { data ->
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        // 饼图 (带中心文字)
-                                        PieChartWithCenter(
-                                            data = data.items,
-                                            selectedIndex = selectedPieIndex,
-                                            onSliceClick = { index ->
-                                                selectedPieIndex =
-                                                    if (selectedPieIndex == index) -1 else index
+                    // 图表区域
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when (selectedChartType) {
+                                    ChartType.LINE -> {
+                                        lineChartData?.let { data ->
+                                            Column {
+                                                AppLineChart(data = data)
+                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Text(
+                                                    text = "播放量（万）",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
                                             }
-                                        )
+                                        }
+                                    }
 
-                                        Spacer(modifier = Modifier.height(24.dp))
-
-                                        // 图例
-                                        Text(
-                                            text = "Android工程师薪资占比情况",
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                        Spacer(modifier = Modifier.height(12.dp))
-
-                                        data.items.forEachIndexed { index, item ->
-                                            PieLegendItem(
-                                                item = item,
-                                                isSelected = selectedPieIndex == index,
-                                                onClick = {
-                                                    selectedPieIndex =
-                                                        if (selectedPieIndex == index) -1 else index
+                                    ChartType.BAR -> {
+                                        barChartData?.let { data ->
+                                            Column {
+                                                AppBarChart(data = data)
+                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                                ) {
+                                                    LegendItem(color = Color(0xFF2196F3), label = "点赞（千）")
+                                                    LegendItem(color = Color(0xFFFF9800), label = "投币（千）")
                                                 }
-                                            )
+                                            }
+                                        }
+                                    }
+
+                                    ChartType.PIE -> {
+                                        pieChartData?.let { data ->
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                PieChartWithCenter(
+                                                    data = data.items,
+                                                    selectedIndex = selectedPieIndex,
+                                                    onSliceClick = { index ->
+                                                        selectedPieIndex =
+                                                            if (selectedPieIndex == index) -1 else index
+                                                    }
+                                                )
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                // 分区图例
+                                                data.items.forEach { item ->
+                                                    PieLegendRow(item = item)
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+
+                    // 排行榜数据标题
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "排行榜详情",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "共 ${rankingList.size} 个视频",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // 排行榜列表
+                    itemsIndexed(rankingList.take(20)) { index, item ->
+                        RankingVideoItem(
+                            rank = index + 1,
+                            item = item,
+                            onClick = { onVideoClick?.invoke(item) }
+                        )
+                        if (index < 19) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
                     }
                 }
             }
@@ -178,6 +223,161 @@ fun ChartScreen(viewModel: ChartViewModel = koinViewModel()) {
 }
 
 @Composable
+private fun LegendItem(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(color, CircleShape)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun PieLegendRow(item: PieChartItem) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(Color(item.color), CircleShape)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = item.label,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = "%.1f%%".format(item.value),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun RankingVideoItem(
+    rank: Int,
+    item: BilibiliRankingItem,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 排名
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(
+                    when (rank) {
+                        1 -> Color(0xFFFFD700)  // 金
+                        2 -> Color(0xFFC0C0C0)  // 银
+                        3 -> Color(0xFFCD7F32)  // 铜
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "$rank",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (rank <= 3) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 封面
+        AsyncImage(
+            model = item.pic,
+            contentDescription = item.title,
+            modifier = Modifier
+                .width(120.dp)
+                .aspectRatio(16f / 9f)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 视频信息
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.owner.name,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // 播放量
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatCount(item.stat.view),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                // 点赞
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.ThumbUp,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatCount(item.stat.like),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun formatCount(count: Long): String {
+    return when {
+        count >= 100_000_000 -> "%.1f亿".format(count / 100_000_000f)
+        count >= 10_000 -> "%.1f万".format(count / 10_000f)
+        else -> count.toString()
+    }
+}
+
+@Composable
 private fun PieChartWithCenter(
     data: List<PieChartItem>,
     selectedIndex: Int,
@@ -185,9 +385,8 @@ private fun PieChartWithCenter(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.size(280.dp)
+        modifier = Modifier.size(240.dp)
     ) {
-        // 饼图
         AppPieChart(
             data = ovo.sypw.androidendproject.data.model.PieChartData(
                 title = "",
@@ -196,7 +395,6 @@ private fun PieChartWithCenter(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 中心文字
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -212,106 +410,16 @@ private fun PieChartWithCenter(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "${item.value}%",
+                    text = "%.1f%%".format(item.value),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(item.color)
                 )
             } else {
                 Text(
-                    text = "点击显示",
+                    text = "分区分布",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "相关数据",
-                    style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PieLegendItem(
-    item: PieChartItem,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
-                Color(item.color).copy(alpha = 0.1f)
-            else
-                MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 4.dp else 1.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 颜色指示器
-            Box(
-                modifier = Modifier
-                    .size(16.dp)
-                    .clip(CircleShape)
-                    .background(Color(item.color))
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            // 标签
-            Text(
-                text = item.label,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
-            )
-            // 百分比
-            Text(
-                text = "${item.value}%",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color(item.color) else MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
-private fun ChartLegend(
-    description: String,
-    labels: List<String>,
-    values: List<String>
-) {
-    Column {
-        Text(
-            text = description,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        labels.zip(values).forEach { (label, value) ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "• $label",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
                 )
             }
         }

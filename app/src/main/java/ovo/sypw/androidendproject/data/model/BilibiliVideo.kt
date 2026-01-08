@@ -47,7 +47,9 @@ data class BilibiliStat(
     val favorite: Long,  // 收藏数
     val coin: Long,      // 投币数
     val share: Long,     // 分享数
-    val like: Long       // 点赞数
+    val like: Long,       // 点赞数
+    @SerializedName("his_rank")
+    val hisRank: Int     // 历史最高排名
 )
 
 data class BilibiliRcmdReason(

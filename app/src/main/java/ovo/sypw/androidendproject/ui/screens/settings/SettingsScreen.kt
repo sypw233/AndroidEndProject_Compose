@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -148,6 +149,83 @@ fun SettingsScreen(
                     }
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ========== B站设置 ==========
+            SettingsSectionHeader(title = "B站设置")
+
+            // B站 Cookies 状态
+            var bilibiliCookies by remember {
+                mutableStateOf(PreferenceUtils.getBilibiliCookies(context))
+            }
+            var showCookiesDialog by remember { mutableStateOf(false) }
+            var tempCookies by remember { mutableStateOf("") }
+
+            // B站 Cookies 对话框
+            if (showCookiesDialog) {
+                AlertDialog(
+                    onDismissRequest = { showCookiesDialog = false },
+                    title = { Text("设置 B站 Cookies") },
+                    text = {
+                        Column {
+                            Text(
+                                text = "在浏览器登录 B站后，从开发者工具复制 Cookie 值粘贴到此处。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = tempCookies,
+                                onValueChange = { tempCookies = it },
+                                label = { Text("Cookies") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = false,
+                                maxLines = 5,
+                                placeholder = { Text("SESSDATA=xxx; bili_jct=xxx; ...") }
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            bilibiliCookies = tempCookies
+                            PreferenceUtils.setBilibiliCookies(context, tempCookies)
+                            showCookiesDialog = false
+                        }) {
+                            Text("保存")
+                        }
+                    },
+                    dismissButton = {
+                        Row {
+                            if (bilibiliCookies.isNotBlank()) {
+                                TextButton(onClick = {
+                                    tempCookies = ""
+                                    bilibiliCookies = ""
+                                    PreferenceUtils.setBilibiliCookies(context, "")
+                                    showCookiesDialog = false
+                                }) {
+                                    Text("清除", color = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                            TextButton(onClick = { showCookiesDialog = false }) {
+                                Text("取消")
+                            }
+                        }
+                    }
+                )
+            }
+
+            SettingsClickItem(
+                icon = Icons.Default.Cookie,
+                title = "B站 Cookies",
+                subtitle = if (bilibiliCookies.isBlank()) "未设置" else "已设置 (${bilibiliCookies.take(20)}...)",
+                onClick = {
+                    tempCookies = bilibiliCookies
+                    showCookiesDialog = true
+                }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
             HorizontalDivider()

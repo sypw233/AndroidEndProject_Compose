@@ -3,7 +3,9 @@ package ovo.sypw.androidendproject.data.remote
 import ovo.sypw.androidendproject.data.model.Banner
 import ovo.sypw.androidendproject.data.model.News
 import ovo.sypw.androidendproject.data.model.Video
+import ovo.sypw.androidendproject.utils.PreferenceUtils
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Query
 
 /**
@@ -58,4 +60,17 @@ interface ApiService {
         @Query("pn") page: Int = 1,
         @Query("ps") pageSize: Int = 20
     ): ovo.sypw.androidendproject.data.model.BilibiliPopularResponse
+
+    /**
+     * 获取 B站分区排行榜
+     * @param rid 分区 ID，0 为全站
+     * @param type 排行榜类型：all=全部, origin=原创, rookie=新人
+     */
+    @retrofit2.http.Headers("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+    @GET("https://api.bilibili.com/x/web-interface/ranking/v2")
+    suspend fun getBilibiliRanking(
+        @Query("rid") rid: Int = 0,
+        @Query("type") type: String = "all",
+        @Header("Cookie") cookie: String = ""
+    ): ovo.sypw.androidendproject.data.model.BilibiliRankingResponse
 }

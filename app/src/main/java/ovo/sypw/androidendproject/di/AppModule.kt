@@ -29,7 +29,7 @@ val repositoryModule = module {
     single { NewsRepository(get(), androidContext()) }
     single { VideoRepository(get()) }
     single { UserRepository() }
-    single { ChartRepository() }
+    single { ChartRepository(get(), androidContext()) }
 }
 
 val viewModelModule = module {
