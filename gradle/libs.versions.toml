@@ -43,6 +43,7 @@ media3 = "1.9.0"
 
 # Baidu Map
 baiduMap = "7.6.6"
+baiduMapLocation = "9.6.6.2"
 
 # Google Ads
 playServicesAds = "24.9.0"
@@ -125,6 +126,7 @@ media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "medi
 
 # Baidu Map
 baidu-map = { group = "com.baidu.lbsyun", name = "BaiduMapSDK_Map", version.ref = "baiduMap" }
+baidu-map-location = { group = "com.baidu.lbsyun", name = "BaiduMapSDK_Location", version.ref = "baiduMapLocation" }
 baidu-map-search = { group = "com.baidu.lbsyun", name = "BaiduMapSDK_Search", version.ref = "baiduMap" }
 baidu-map-util = { group = "com.baidu.lbsyun", name = "BaiduMapSDK_Util", version.ref = "baiduMap" }
 

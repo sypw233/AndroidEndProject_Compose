@@ -3,6 +3,7 @@ package ovo.sypw.androidendproject.ui.screens.map
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -17,9 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,17 +52,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.baidu.location.BDAbstractLocationListener
+import com.baidu.location.BDLocation
+import com.baidu.location.LocationClient
+import com.baidu.location.LocationClientOption
 import com.baidu.mapapi.map.BaiduMap
 import com.baidu.mapapi.map.BitmapDescriptorFactory
 import com.baidu.mapapi.map.MapStatusUpdateFactory
 import com.baidu.mapapi.map.MapView
 import com.baidu.mapapi.map.MarkerOptions
+import com.baidu.mapapi.map.MyLocationData
 import com.baidu.mapapi.model.LatLng
 import com.baidu.mapapi.search.core.PoiInfo
 import com.baidu.mapapi.search.core.SearchResult
@@ -79,6 +90,7 @@ import com.baidu.mapapi.search.poi.PoiSearch
 @Composable
 fun MapScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
 
     // 搜索关键词
     var searchKeyword by remember { mutableStateOf("") }
@@ -92,20 +104,26 @@ fun MapScreen(onBack: () -> Unit) {
 
     // 当前位置 (默认北京)
     var currentLocation by remember { mutableStateOf(LatLng(39.915, 116.404)) }
+    var isLocationReady by remember { mutableStateOf(false) }
 
-    // 权限请求
-    val hasLocationPermission = remember {
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+    // 权限状态
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
+        hasLocationPermission = granted
         if (granted) {
             Toast.makeText(context, "定位权限已授予", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "定位权限被拒绝，将使用默认位置", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -116,15 +134,73 @@ fun MapScreen(onBack: () -> Unit) {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            // 初始化时调用 onResume
             onResume()
         }
     }
 
     val baiduMap = remember { mapView.map }
 
+    // 定位客户端
+    val locationClient = remember {
+        try {
+            LocationClient(context.applicationContext).apply {
+                val option = LocationClientOption().apply {
+                    setIsNeedAddress(true)
+                    setOpenGps(true)
+                    setCoorType("bd09ll")
+                    setScanSpan(0) // 单次定位
+                }
+                locOption = option
+            }
+        } catch (e: Exception) {
+            Log.e("MapScreen", "创建定位客户端失败", e)
+            null
+        }
+    }
+
     // POI 搜索
     val poiSearch = remember { PoiSearch.newInstance() }
+
+    // 定位监听器
+    val locationListener = remember {
+        object : BDAbstractLocationListener() {
+            override fun onReceiveLocation(location: BDLocation?) {
+                if (location == null) {
+                    Log.w("MapScreen", "定位失败：location is null")
+                    return
+                }
+                
+                if (location.locType == BDLocation.TypeGpsLocation || 
+                    location.locType == BDLocation.TypeNetWorkLocation ||
+                    location.locType == BDLocation.TypeOffLineLocation) {
+                    
+                    val lat = location.latitude
+                    val lng = location.longitude
+                    Log.d("MapScreen", "定位成功: lat=$lat, lng=$lng, addr=${location.addrStr}")
+                    
+                    currentLocation = LatLng(lat, lng)
+                    isLocationReady = true
+                    
+                    // 更新地图上的位置标记
+                    val locData = MyLocationData.Builder()
+                        .accuracy(location.radius)
+                        .direction(location.direction)
+                        .latitude(lat)
+                        .longitude(lng)
+                        .build()
+                    baiduMap.setMyLocationData(locData)
+                    
+                    // 移动到当前位置
+                    baiduMap.animateMapStatus(
+                        MapStatusUpdateFactory.newLatLngZoom(currentLocation, 15f)
+                    )
+                } else {
+                    Log.w("MapScreen", "定位失败: locType=${location.locType}")
+                    Toast.makeText(context, "定位失败，使用默认位置", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     // 设置 POI 搜索监听器
     LaunchedEffect(poiSearch) {
@@ -185,9 +261,10 @@ fun MapScreen(onBack: () -> Unit) {
         }
     }
 
-    // 初始化地图
+    // 初始化地图和定位
     LaunchedEffect(Unit) {
         baiduMap.mapType = BaiduMap.MAP_TYPE_NORMAL
+        baiduMap.isMyLocationEnabled = true
         baiduMap.animateMapStatus(
             MapStatusUpdateFactory.newLatLngZoom(currentLocation, 15f)
         )
@@ -197,17 +274,31 @@ fun MapScreen(onBack: () -> Unit) {
         }
     }
 
-    // 清理百度地图资源（不调用 onDestroy 避免后台线程崩溃）
+    // 权限获取后启动定位
+    LaunchedEffect(hasLocationPermission) {
+        if (hasLocationPermission && locationClient != null) {
+            try {
+                locationClient.registerLocationListener(locationListener)
+                locationClient.start()
+                Log.d("MapScreen", "定位服务已启动")
+            } catch (e: Exception) {
+                Log.e("MapScreen", "启动定位服务失败", e)
+            }
+        }
+    }
+
+    // 清理资源
     DisposableEffect(Unit) {
         onDispose {
             try {
-                // 清除地图覆盖物
+                locationClient?.let {
+                    it.unRegisterLocationListener(locationListener)
+                    it.stop()
+                }
+                baiduMap.isMyLocationEnabled = false
                 baiduMap.clear()
-                // 销毁 POI 搜索
                 poiSearch.destroy()
-                // 暂停地图渲染
                 mapView.onPause()
-                // 注意：不调用 mapView.onDestroy()，避免与后台线程冲突导致 native 崩溃
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -220,6 +311,9 @@ fun MapScreen(onBack: () -> Unit) {
             Toast.makeText(context, "请输入搜索关键词", Toast.LENGTH_SHORT).show()
             return
         }
+        // 清除焦点
+        focusManager.clearFocus()
+        
         isSearching = true
         selectedPoi = null
         poiSearch.searchNearby(
@@ -247,9 +341,12 @@ fun MapScreen(onBack: () -> Unit) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    baiduMap.animateMapStatus(
-                        MapStatusUpdateFactory.newLatLngZoom(currentLocation, 15f)
-                    )
+                    if (hasLocationPermission && locationClient != null) {
+                        locationClient.start()
+                        Toast.makeText(context, "正在获取位置...", Toast.LENGTH_SHORT).show()
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    }
                 },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
@@ -268,37 +365,46 @@ fun MapScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxSize()
             )
 
-            // 搜索栏
+            // 搜索栏和结果区域
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 // 搜索输入框
-                OutlinedTextField(
-                    value = searchKeyword,
-                    onValueChange = { searchKeyword = it },
-                    placeholder = { Text("搜索附近地点...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null)
-                    },
-                    trailingIcon = {
-                        if (isSearching) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchKeyword,
+                        onValueChange = { searchKeyword = it },
+                        placeholder = { Text("搜索附近地点...") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            if (isSearching) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else if (searchKeyword.isNotBlank()) {
+                                IconButton(onClick = { searchPoi(searchKeyword) }) {
+                                    Icon(Icons.Default.Search, contentDescription = "搜索")
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(24.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                RoundedCornerShape(24.dp)
                             )
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(24.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            MaterialTheme.colorScheme.surface,
-                            RoundedCornerShape(24.dp)
-                        )
-                )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -316,18 +422,39 @@ fun MapScreen(onBack: () -> Unit) {
                         )
                     }
                 }
-            }
 
-            // 搜索按钮
-            if (searchKeyword.isNotBlank() && !isSearching) {
-                FloatingActionButton(
-                    onClick = { searchPoi(searchKeyword) },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 16.dp),
-                    containerColor = MaterialTheme.colorScheme.secondary
-                ) {
-                    Icon(Icons.Default.Search, contentDescription = "搜索")
+                // 搜索结果列表（显示在搜索框下方）
+                if (poiList.isNotEmpty() && selectedPoi == null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 250.dp)
+                                .padding(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(poiList.take(10)) { poi ->
+                                PoiSearchResultItem(
+                                    poi = poi,
+                                    onClick = {
+                                        selectedPoi = poi
+                                        poi.location?.let {
+                                            baiduMap.animateMapStatus(
+                                                MapStatusUpdateFactory.newLatLngZoom(it, 17f)
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -339,24 +466,6 @@ fun MapScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(16.dp)
-                        .padding(bottom = 72.dp)
-                )
-            }
-
-            // POI 列表 (底部滚动)
-            if (poiList.isNotEmpty() && selectedPoi == null) {
-                PoiListRow(
-                    poiList = poiList,
-                    onPoiClick = { poi ->
-                        selectedPoi = poi
-                        poi.location?.let {
-                            baiduMap.animateMapStatus(
-                                MapStatusUpdateFactory.newLatLngZoom(it, 17f)
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
                         .padding(bottom = 72.dp)
                 )
             }
@@ -385,68 +494,41 @@ private fun QuickSearchChip(
 }
 
 @Composable
-private fun PoiListRow(
-    poiList: List<PoiInfo>,
-    onPoiClick: (PoiInfo) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyRow(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(poiList.take(10)) { poi ->
-            PoiListItem(
-                poi = poi,
-                onClick = { onPoiClick(poi) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun PoiListItem(
+private fun PoiSearchResultItem(
     poi: PoiInfo,
     onClick: () -> Unit
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.width(160.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.LocationOn,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+        Icon(
+            Icons.Default.LocationOn,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = poi.name ?: "未知地点",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (!poi.address.isNullOrBlank()) {
                 Text(
-                    text = poi.name ?: "未知地点",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = poi.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = poi.address ?: "",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }

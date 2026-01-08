@@ -111,6 +111,7 @@ dependencies {
 
     // Baidu Map
     implementation(libs.baidu.map)
+    implementation(libs.baidu.map.location)
     implementation(libs.baidu.map.search)
     implementation(libs.baidu.map.util)
 
