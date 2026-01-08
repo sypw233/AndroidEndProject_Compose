@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -229,6 +230,91 @@ fun SettingsScreen(
                     tempCookies = bilibiliCookies
                     showCookiesDialog = true
                 }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ========== AI 设置 ==========
+            SettingsSectionHeader(title = "AI 设置")
+
+            // AI API 配置状态
+            var aiBaseUrl by remember {
+                mutableStateOf(PreferenceUtils.getAIBaseUrl(context))
+            }
+            var aiApiKey by remember {
+                mutableStateOf(PreferenceUtils.getAIApiKey(context))
+            }
+            var aiDefaultModel by remember {
+                mutableStateOf(PreferenceUtils.getAIDefaultModel(context))
+            }
+            var showAISettingsDialog by remember { mutableStateOf(false) }
+
+            // AI 设置对话框
+            if (showAISettingsDialog) {
+                AlertDialog(
+                    onDismissRequest = { showAISettingsDialog = false },
+                    title = { Text("AI 设置") },
+                    text = {
+                        Column {
+                            OutlinedTextField(
+                                value = aiBaseUrl,
+                                onValueChange = { aiBaseUrl = it },
+                                label = { Text("API Base URL") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                placeholder = { Text("https://api.moonshot.ai/v1") }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = aiApiKey,
+                                onValueChange = { aiApiKey = it },
+                                label = { Text("API Key") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                placeholder = { Text("sk-...") }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = aiDefaultModel,
+                                onValueChange = { aiDefaultModel = it },
+                                label = { Text("默认模型") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                placeholder = { Text("moonshot-v1-8k") }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Kimi 可用模型: moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            PreferenceUtils.setAIBaseUrl(context, aiBaseUrl)
+                            PreferenceUtils.setAIApiKey(context, aiApiKey)
+                            PreferenceUtils.setAIDefaultModel(context, aiDefaultModel)
+                            showAISettingsDialog = false
+                        }) {
+                            Text("保存")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showAISettingsDialog = false }) {
+                            Text("取消")
+                        }
+                    }
+                )
+            }
+
+            SettingsClickItem(
+                icon = Icons.Default.Psychology,
+                title = "AI 配置",
+                subtitle = if (aiApiKey.isBlank()) "未配置 API Key" else "已配置 ($aiDefaultModel)",
+                onClick = { showAISettingsDialog = true }
             )
 
             Spacer(modifier = Modifier.height(24.dp))

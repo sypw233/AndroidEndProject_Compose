@@ -139,5 +139,17 @@ fun AppNavigation(
                 }
             )
         }
+
+        // AI 对话页面
+        composable(
+            route = Screen.Chat.route,
+            arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val conversationId = backStackEntry.arguments?.getString("conversationId") ?: ""
+            ovo.sypw.androidendproject.ui.screens.chat.ChatScreen(
+                conversationId = conversationId,
+                onBack = { navController.popBackStack() }
+            )
+        }
     }
 }

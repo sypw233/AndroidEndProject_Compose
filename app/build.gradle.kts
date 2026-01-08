@@ -41,6 +41,18 @@ android {
         compose = true
         buildConfig = true
     }
+    packaging {
+        resources {
+            // 排除掉引起冲突的 Netty 索引文件
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/okio.kotlin_module" // 如果你用了 OkHttp
+            // 常见的开源协议冗余文件，排除它们还能稍微减小一点 APK 体积
+            excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/NOTICE*"
+            excludes += "/META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -116,6 +128,9 @@ dependencies {
 
     // WebView
     implementation(libs.compose.webview)
+
+    // Koog AI SDK
+    implementation(libs.koog.agents)
 
     // Test
     testImplementation(libs.junit)

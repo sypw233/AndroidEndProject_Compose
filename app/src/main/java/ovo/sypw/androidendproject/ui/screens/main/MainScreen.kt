@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
@@ -40,6 +41,7 @@ enum class BottomNavItem(
     Home(Screen.Home.route, "首页", Icons.Default.Home),
     Chart(Screen.Chart.route, "图表", Icons.Default.BarChart),
     Video(Screen.Video.route, "视频", Icons.Default.PlayCircle),
+    AIChat(Screen.ChatList.route, "AI", Icons.Default.Chat),
     Me(Screen.Me.route, "我的", Icons.Default.Person)
 }
 
@@ -141,6 +143,13 @@ fun MainScreen(navController: NavHostController) {
                         navController.navigate(
                             Screen.NewsDetail.createRoute(bilibiliUrl, bilibiliVideo.title)
                         )
+                    }
+                )
+            }
+            composable(Screen.ChatList.route) {
+                ovo.sypw.androidendproject.ui.screens.chat.ChatListScreen(
+                    onConversationClick = { conversationId ->
+                        navController.navigate(Screen.Chat.createRoute(conversationId))
                     }
                 )
             }

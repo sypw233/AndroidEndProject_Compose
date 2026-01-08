@@ -69,5 +69,43 @@ object PreferenceUtils {
     fun setBilibiliCookies(context: Context, cookies: String) {
         getPreferences(context).edit { putString(KEY_BILIBILI_COOKIES, cookies) }
     }
+
+    // ========== AI 配置 ==========
+    private const val KEY_AI_BASE_URL = "ai_base_url"
+    private const val KEY_AI_API_KEY = "ai_api_key"
+    private const val KEY_AI_DEFAULT_MODEL = "ai_default_model"
+    private const val KEY_AI_MODELS = "ai_models"
+
+    fun getAIBaseUrl(context: Context): String {
+        return getString(context, KEY_AI_BASE_URL, "https://api.moonshot.ai/v1")
+    }
+
+    fun setAIBaseUrl(context: Context, url: String) {
+        putString(context, KEY_AI_BASE_URL, url)
+    }
+
+    fun getAIApiKey(context: Context): String {
+        return getString(context, KEY_AI_API_KEY, "")
+    }
+
+    fun setAIApiKey(context: Context, key: String) {
+        putString(context, KEY_AI_API_KEY, key)
+    }
+
+    fun getAIDefaultModel(context: Context): String {
+        return getString(context, KEY_AI_DEFAULT_MODEL, "moonshot-v1-8k")
+    }
+
+    fun setAIDefaultModel(context: Context, model: String) {
+        putString(context, KEY_AI_DEFAULT_MODEL, model)
+    }
+
+    fun getAIModelsJson(context: Context): String {
+        return getString(context, KEY_AI_MODELS, "")
+    }
+
+    fun setAIModelsJson(context: Context, json: String) {
+        putString(context, KEY_AI_MODELS, json)
+    }
 }
 

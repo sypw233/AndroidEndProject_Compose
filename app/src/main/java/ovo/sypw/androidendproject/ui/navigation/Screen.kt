@@ -35,4 +35,10 @@ sealed class Screen(val route: String) {
 
     data object Python : Screen("python")
     data object Settings : Screen("settings")
+
+    // AI Chat
+    data object ChatList : Screen("chat_list")
+    data object Chat : Screen("chat/{conversationId}") {
+        fun createRoute(conversationId: String) = "chat/$conversationId"
+    }
 }
