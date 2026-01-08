@@ -111,8 +111,14 @@ fun AppNavigation(
             )
         }
 
-        // 地图页
-        composable(Screen.Map.route) {
+        // 地图页 (禁用动画，因为 AndroidView 不支持 Compose 动画)
+        composable(
+            route = Screen.Map.route,
+            enterTransition = { androidx.compose.animation.EnterTransition.None },
+            exitTransition = { androidx.compose.animation.ExitTransition.None },
+            popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+            popExitTransition = { androidx.compose.animation.ExitTransition.None }
+        ) {
             MapScreen(onBack = { navController.popBackStack() })
         }
 

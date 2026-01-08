@@ -273,11 +273,11 @@ class NewsRepository(
                                     id = link,
                                     title = title,
                                     content = plainContent.take(100) + "...",
-                                    author = "ITHome",
+                                    author = "IT之家",
                                     publishTime = formatDate(pubDate),
                                     imageUrl = imageUrl,
                                     sourceUrl = link,
-                                    category = "Tech",
+                                    category = "",
                                     viewType = if (imageUrl != null) News.VIEW_TYPE_SINGLE else News.VIEW_TYPE_TEXT
                                 )
                             )

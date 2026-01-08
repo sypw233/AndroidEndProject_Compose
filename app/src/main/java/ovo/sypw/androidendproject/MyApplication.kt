@@ -1,7 +1,7 @@
 package ovo.sypw.androidendproject
 
 import android.app.Application
-import com.baidu.mapapi.SDKInitializer
+import com.amap.api.maps.MapsInitializer
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.FirebaseApp
 import org.koin.android.ext.koin.androidContext
@@ -31,9 +31,10 @@ class MyApplication : Application() {
         // 2. 初始化 Firebase
         FirebaseApp.initializeApp(this)
 
-        // 3. 初始化百度地图
-        SDKInitializer.setAgreePrivacy(this, true)
-        SDKInitializer.initialize(this)
+        // 3. 初始化高德地图
+        MapsInitializer.initialize(this)
+//        MapsInitializer.updatePrivacyShow(this,true,true);
+//        MapsInitializer.updatePrivacyAgree(this,true);
 
         // 4. 初始化 Google Mobile Ads SDK
         MobileAds.initialize(this) { initializationStatus ->

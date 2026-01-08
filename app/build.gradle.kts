@@ -18,7 +18,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders["BAIDU_MAP_API_KEY"] = "hhxAhqdeztSALEvtxFwCh7WfKWjlrGjr"
+        manifestPlaceholders["AMAP_API_KEY"] = "your_amap_api_key_here"
     }
 
     buildTypes {
@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.splashscreen)
@@ -108,12 +109,6 @@ dependencies {
     // Video
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
-
-    // Baidu Map
-    implementation(libs.baidu.map)
-    implementation(libs.baidu.map.location)
-    implementation(libs.baidu.map.search)
-    implementation(libs.baidu.map.util)
 
     // Google Ads
     implementation(libs.play.services.ads)
