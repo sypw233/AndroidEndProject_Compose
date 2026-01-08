@@ -31,7 +31,7 @@ class AIService(private val context: Context) {
         .build()
 
     companion object {
-        const val DEFAULT_BASE_URL = "https://api.moonshot.ai/v1"
+        const val DEFAULT_BASE_URL = "https://api.moonshot.cn/v1"
         const val DEFAULT_MODEL = "moonshot-v1-8k"
     }
 
@@ -52,23 +52,30 @@ class AIService(private val context: Context) {
         }
 
         val messagesJson = JSONArray().apply {
-            messages.forEach { msg ->
+            val lastIndex = messages.size - 1
+            messages.forEachIndexed { index, msg ->
                 put(JSONObject().apply {
                     put("role", msg.role)
                     if (msg.imageBase64 != null) {
-                        // 多模态消息格式
-                        put("content", JSONArray().apply {
-                            put(JSONObject().apply {
-                                put("type", "text")
-                                put("text", msg.content)
-                            })
-                            put(JSONObject().apply {
-                                put("type", "image_url")
-                                put("image_url", JSONObject().apply {
-                                    put("url", "data:image/jpeg;base64,${msg.imageBase64}")
+                        // 只有最后一条消息发送完整图片，历史消息用占位符替代
+                        if (index == lastIndex) {
+                            // 最新消息 - 发送完整图片
+                            put("content", JSONArray().apply {
+                                put(JSONObject().apply {
+                                    put("type", "text")
+                                    put("text", msg.content)
+                                })
+                                put(JSONObject().apply {
+                                    put("type", "image_url")
+                                    put("image_url", JSONObject().apply {
+                                        put("url", "data:image/jpeg;base64,${msg.imageBase64}")
+                                    })
                                 })
                             })
-                        })
+                        } else {
+                            // 历史消息 - 用占位符替代图片
+                            put("content", "${msg.content}\n[user_image]")
+                        }
                     } else {
                         put("content", msg.content)
                     }

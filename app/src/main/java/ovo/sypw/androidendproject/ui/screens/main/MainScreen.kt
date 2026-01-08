@@ -115,11 +115,27 @@ fun MainScreen(navController: NavHostController) {
                         )
                     },
                     onCategoryClick = { categoryId ->
-                        // Python 分类跳转到 PythonScreen
-                        if (categoryId == "python") {
-                            navController.navigate(Screen.Python.route)
+                        when (categoryId) {
+                            "android" -> navController.navigate(
+                                Screen.WebView.createRoute(
+                                    "https://www.runoob.com/android/android-tutorial.html",
+                                    "Android教程"
+                                )
+                            )
+                            "java" -> navController.navigate(
+                                Screen.WebView.createRoute(
+                                    "https://www.runoob.com/java/java-tutorial.html",
+                                    "Java教程"
+                                )
+                            )
+                            "php" -> navController.navigate(
+                                Screen.WebView.createRoute(
+                                    "https://www.runoob.com/php/php-tutorial.html",
+                                    "PHP教程"
+                                )
+                            )
+                            "python" -> navController.navigate(Screen.Python.route)
                         }
-                        // 其他分类暂时不处理
                     }
                 )
             }

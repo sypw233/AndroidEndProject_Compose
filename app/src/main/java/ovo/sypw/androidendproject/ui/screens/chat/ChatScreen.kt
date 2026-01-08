@@ -32,12 +32,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
-import ovo.sypw.androidendproject.data.model.AIModelConfig
 import ovo.sypw.androidendproject.ui.screens.chat.components.ChatInput
 import ovo.sypw.androidendproject.ui.screens.chat.components.ChatMessageBubble
 
@@ -57,6 +55,7 @@ fun ChatScreen(
     val streamingContent by viewModel.streamingContent.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val currentModel by viewModel.currentModel.collectAsState()
+    val availableModels by viewModel.availableModels.collectAsState()
     val thinkingEnabled by viewModel.thinkingEnabled.collectAsState()
     val pendingImageBase64 by viewModel.pendingImageBase64.collectAsState()
 
@@ -116,19 +115,19 @@ fun ChatScreen(
                             expanded = showModelMenu,
                             onDismissRequest = { showModelMenu = false }
                         ) {
-                            AIModelConfig.DEFAULT_MODELS.forEach { model ->
+                            availableModels.forEach { model ->
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
-                                            text = model.name,
-                                            color = if (model.id == currentModel) 
+                                            text = model,
+                                            color = if (model == currentModel) 
                                                 MaterialTheme.colorScheme.primary 
                                             else 
                                                 MaterialTheme.colorScheme.onSurface
                                         )
                                     },
                                     onClick = {
-                                        viewModel.switchModel(model.id)
+                                        viewModel.switchModel(model)
                                         showModelMenu = false
                                     }
                                 )

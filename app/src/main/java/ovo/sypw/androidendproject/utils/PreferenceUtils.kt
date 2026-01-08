@@ -75,9 +75,10 @@ object PreferenceUtils {
     private const val KEY_AI_API_KEY = "ai_api_key"
     private const val KEY_AI_DEFAULT_MODEL = "ai_default_model"
     private const val KEY_AI_MODELS = "ai_models"
+    private const val KEY_AI_LAST_MODEL = "ai_last_model"
 
     fun getAIBaseUrl(context: Context): String {
-        return getString(context, KEY_AI_BASE_URL, "https://api.moonshot.ai/v1")
+        return getString(context, KEY_AI_BASE_URL, "https://api.moonshot.cn/v1")
     }
 
     fun setAIBaseUrl(context: Context, url: String) {
@@ -93,7 +94,7 @@ object PreferenceUtils {
     }
 
     fun getAIDefaultModel(context: Context): String {
-        return getString(context, KEY_AI_DEFAULT_MODEL, "moonshot-v1-8k")
+        return getString(context, KEY_AI_DEFAULT_MODEL, "kimi-latest")
     }
 
     fun setAIDefaultModel(context: Context, model: String) {
@@ -106,6 +107,20 @@ object PreferenceUtils {
 
     fun setAIModelsJson(context: Context, json: String) {
         putString(context, KEY_AI_MODELS, json)
+    }
+
+    /**
+     * 获取上次使用的模型
+     */
+    fun getAILastModel(context: Context): String {
+        return getString(context, KEY_AI_LAST_MODEL, getAIDefaultModel(context))
+    }
+
+    /**
+     * 设置上次使用的模型
+     */
+    fun setAILastModel(context: Context, model: String) {
+        putString(context, KEY_AI_LAST_MODEL, model)
     }
 }
 

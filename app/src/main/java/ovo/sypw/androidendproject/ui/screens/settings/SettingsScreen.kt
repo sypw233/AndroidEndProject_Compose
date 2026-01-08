@@ -12,9 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AdsClick
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cookie
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.AlertDialog
@@ -249,10 +252,30 @@ fun SettingsScreen(
             var aiDefaultModel by remember {
                 mutableStateOf(PreferenceUtils.getAIDefaultModel(context))
             }
+            var aiModelsJson by remember {
+                mutableStateOf(PreferenceUtils.getAIModelsJson(context))
+            }
             var showAISettingsDialog by remember { mutableStateOf(false) }
+            var showModelListDialog by remember { mutableStateOf(false) }
+            var newModelName by remember { mutableStateOf("") }
+
+            // 解析模型列表
+            val modelList = remember(aiModelsJson) {
+                if (aiModelsJson.isBlank()) {
+                    listOf("kimi-latest", "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k")
+                } else {
+                    try {
+                        aiModelsJson.split(",").map { it.trim() }.filter { it.isNotBlank() }
+                    } catch (e: Exception) {
+                        listOf("kimi-latest", "moonshot-v1-8k")
+                    }
+                }
+            }
 
             // AI 设置对话框
             if (showAISettingsDialog) {
+                var expandedModelDropdown by remember { mutableStateOf(false) }
+                
                 AlertDialog(
                     onDismissRequest = { showAISettingsDialog = false },
                     title = { Text("AI 设置") },
@@ -264,7 +287,7 @@ fun SettingsScreen(
                                 label = { Text("API Base URL") },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
-                                placeholder = { Text("https://api.moonshot.ai/v1") }
+                                placeholder = { Text("https://api.moonshot.cn/v1") }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
@@ -276,20 +299,47 @@ fun SettingsScreen(
                                 placeholder = { Text("sk-...") }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedTextField(
-                                value = aiDefaultModel,
-                                onValueChange = { aiDefaultModel = it },
-                                label = { Text("默认模型") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                placeholder = { Text("moonshot-v1-8k") }
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            // 默认模型下拉选择
                             Text(
-                                text = "Kimi 可用模型: moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "默认模型",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
                             )
+                            androidx.compose.foundation.layout.Box {
+                                OutlinedTextField(
+                                    value = aiDefaultModel,
+                                    onValueChange = { },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        IconButton(onClick = { expandedModelDropdown = true }) {
+                                            Icon(Icons.Default.ArrowDropDown, "选择模型")
+                                        }
+                                    }
+                                )
+                                androidx.compose.material3.DropdownMenu(
+                                    expanded = expandedModelDropdown,
+                                    onDismissRequest = { expandedModelDropdown = false }
+                                ) {
+                                    modelList.forEach { model ->
+                                        androidx.compose.material3.DropdownMenuItem(
+                                            text = { Text(model) },
+                                            onClick = {
+                                                aiDefaultModel = model
+                                                expandedModelDropdown = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextButton(
+                                onClick = { showModelListDialog = true }
+                            ) {
+                                Text("管理模型列表 (${modelList.size} 个模型)")
+                            }
                         }
                     },
                     confirmButton = {
@@ -304,6 +354,87 @@ fun SettingsScreen(
                     },
                     dismissButton = {
                         TextButton(onClick = { showAISettingsDialog = false }) {
+                            Text("取消")
+                        }
+                    }
+                )
+            }
+
+            // 模型列表管理对话框
+            if (showModelListDialog) {
+                var tempModelList by remember { mutableStateOf(modelList.toMutableList()) }
+                
+                AlertDialog(
+                    onDismissRequest = { showModelListDialog = false },
+                    title = { Text("管理模型列表") },
+                    text = {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            // 添加新模型
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = newModelName,
+                                    onValueChange = { newModelName = it },
+                                    label = { Text("新模型名称") },
+                                    modifier = Modifier.weight(1f),
+                                    singleLine = true
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    onClick = {
+                                        if (newModelName.isNotBlank() && !tempModelList.contains(newModelName)) {
+                                            tempModelList = (tempModelList + newModelName).toMutableList()
+                                            newModelName = ""
+                                        }
+                                    }
+                                ) {
+                                    Icon(Icons.Default.Add, "添加")
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            // 模型列表
+                            tempModelList.forEach { model ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = model,
+                                        modifier = Modifier.weight(1f),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            tempModelList = tempModelList.filter { it != model }.toMutableList()
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            "删除",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            aiModelsJson = tempModelList.joinToString(",")
+                            PreferenceUtils.setAIModelsJson(context, aiModelsJson)
+                            showModelListDialog = false
+                        }) {
+                            Text("保存")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showModelListDialog = false }) {
                             Text("取消")
                         }
                     }
