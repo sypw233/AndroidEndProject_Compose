@@ -140,6 +140,9 @@ fun MapScreen(onBack: () -> Unit) {
     }
     val aMap = remember { mapView.map }
 
+    // 是否是首次定位
+    var isFirstLocate by remember { mutableStateOf(true) }
+
     // 定位客户端
     val locationClient = remember {
         try {
@@ -149,7 +152,9 @@ fun MapScreen(onBack: () -> Unit) {
                 val option = AMapLocationClientOption().apply {
                     locationPurpose = AMapLocationClientOption.AMapLocationPurpose.SignIn
                     locationMode = AMapLocationClientOption.AMapLocationMode.Hight_Accuracy
-                    isOnceLocation = true
+                    // 修改为连续定位
+                    isOnceLocation = false
+                    interval = 2000 // 2秒定位一次
                     isNeedAddress = true
                 }
                 setLocationOption(option)
@@ -160,11 +165,29 @@ fun MapScreen(onBack: () -> Unit) {
         }
     }
 
+    // 定位数据源 (LocationSource)
+    val locationSource = remember {
+        object : com.amap.api.maps.LocationSource {
+            var listener: com.amap.api.maps.LocationSource.OnLocationChangedListener? = null
+            override fun activate(l: com.amap.api.maps.LocationSource.OnLocationChangedListener?) {
+                listener = l
+            }
+
+            override fun deactivate() {
+                listener = null
+            }
+        }
+    }
+
     // 定位监听器
     val locationListener = remember {
         AMapLocationListener { location ->
             if (location != null) {
                 if (location.errorCode == 0) {
+                    // 1. 将定位数据传递给地图 SDK
+                    locationSource.listener?.onLocationChanged(location)
+
+                    // 2. 更新应用内状态
                     val lat = location.latitude
                     val lng = location.longitude
                     Log.d("MapScreen", "定位成功: lat=$lat, lng=$lng, addr=${location.address}")
@@ -172,16 +195,22 @@ fun MapScreen(onBack: () -> Unit) {
                     currentLocation = LatLng(lat, lng)
                     isLocationReady = true
 
-                    aMap.animateCamera(
-                        CameraUpdateFactory.newLatLngZoom(currentLocation, 15f)
-                    )
+                    // 3. 仅首次定位时自动移动视角
+                    if (isFirstLocate) {
+                        aMap.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(currentLocation, 15f)
+                        )
+                        isFirstLocate = false
+                    }
                 } else {
                     Log.w(
                         "MapScreen",
                         "定位失败: errorCode=${location.errorCode}, errorInfo=${location.errorInfo}"
                     )
-                    Toast.makeText(context, "定位失败：${location.errorInfo}", Toast.LENGTH_SHORT)
-                        .show()
+                    if (isFirstLocate) {
+                        Toast.makeText(context, "定位失败：${location.errorInfo}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
         }
@@ -189,10 +218,15 @@ fun MapScreen(onBack: () -> Unit) {
 
     // 设置地图定位样式
     LaunchedEffect(aMap) {
-        aMap.setMyLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER)
+        aMap.setLocationSource(locationSource) // 设置定位源
         aMap.isMyLocationEnabled = true
+        // LOCATION_TYPE_SHOW: 只定位，不移动地图。视角移动完全由代码 (moveCamera/animateCamera) 控制
+        aMap.myLocationStyle = MyLocationStyle().apply {
+            myLocationType(MyLocationStyle.LOCATION_TYPE_SHOW)
+            interval(2000)
+        }
         aMap.uiSettings.isMyLocationButtonEnabled = false
-        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+        // 初始可不移动，等待 callback 处理 isFirstLocate
     }
 
     // 权限获取后启动定位
@@ -376,8 +410,16 @@ fun MapScreen(onBack: () -> Unit) {
                 FloatingActionButton(
                     onClick = {
                         if (hasLocationPermission && locationClient != null) {
-                            locationClient.startLocation()
-                            Toast.makeText(context, "正在获取位置...", Toast.LENGTH_SHORT).show()
+                            if (!locationClient.isStarted) {
+                                locationClient.startLocation()
+                            }
+                            // 手动点击定位，强制移动视角
+                            if (isLocationReady) {
+                                aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                                Toast.makeText(context, "已回到当前位置", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "正在获取位置...", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                         }
@@ -605,20 +647,13 @@ private fun PoiDetailCard(
             // 地址
             if (!poi.snippet.isNullOrBlank()) {
                 Text(
-                    text = "📍 ${poi.snippet}",
+                    text = "${poi.snippet}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "点击关闭",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.align(Alignment.End)
-            )
         }
     }
 }
