@@ -15,7 +15,7 @@ import ovo.sypw.androidendproject.di.viewModelModule
 
 class MyApplication : Application() {
 
-    lateinit var appOpenAdManager: AppOpenAdManager
+    var appOpenAdManager: AppOpenAdManager? = null
         private set
 
     override fun onCreate() {
@@ -33,14 +33,11 @@ class MyApplication : Application() {
 
         // 3. 初始化高德地图
         MapsInitializer.initialize(this)
-//        MapsInitializer.updatePrivacyShow(this,true,true);
-//        MapsInitializer.updatePrivacyAgree(this,true);
+
+        // 初始化广告管理器（立即注册生命周期回调，确保能监听到 MainActivity 启动）
+        appOpenAdManager = AppOpenAdManager(this)
 
         // 4. 初始化 Google Mobile Ads SDK
-        MobileAds.initialize(this) { initializationStatus ->
-            // 初始化完成后加载开屏广告
-            appOpenAdManager = AppOpenAdManager(this)
-            appOpenAdManager.loadAd()
-        }
+        MobileAds.initialize(this)
     }
 }

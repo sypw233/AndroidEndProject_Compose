@@ -44,6 +44,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        // 进入 Activity 后开始加载广告
+        (application as? ovo.sypw.androidendproject.MyApplication)?.appOpenAdManager?.loadAd()
+    }
+
     private fun preloadAdImages() {
         lifecycleScope.launch {
             try {

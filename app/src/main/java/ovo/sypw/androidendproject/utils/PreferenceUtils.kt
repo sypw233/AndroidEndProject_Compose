@@ -8,6 +8,7 @@ object PreferenceUtils {
     private const val PREF_NAME = "app_preferences"
     private const val KEY_FIRST_LAUNCH = "first_launch"
     private const val KEY_USE_GOOGLE_AD = "use_google_ad"
+    private const val KEY_AD_ENABLED = "ad_enabled"
     private const val KEY_BILIBILI_COOKIES = "bilibili_cookies"
 
 
@@ -28,6 +29,17 @@ object PreferenceUtils {
 
     fun setFirstLaunch(context: Context, isFirst: Boolean) {
         getPreferences(context).edit { putBoolean(KEY_FIRST_LAUNCH, isFirst) }
+    }
+
+    /**
+     * 是否启用广告 (总开关)
+     */
+    fun isAdEnabled(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_AD_ENABLED, true)
+    }
+
+    fun setAdEnabled(context: Context, enabled: Boolean) {
+        getPreferences(context).edit { putBoolean(KEY_AD_ENABLED, enabled) }
     }
 
     /**

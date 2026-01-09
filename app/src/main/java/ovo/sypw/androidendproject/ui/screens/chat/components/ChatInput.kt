@@ -60,8 +60,7 @@ fun ChatInput(
     modifier: Modifier = Modifier
 ) {
     var inputText by remember { mutableStateOf("") }
-    val context = LocalContext.current
-    
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -122,6 +121,7 @@ fun ChatInput(
                                         val bytes = Base64.decode(pendingImageBase64, Base64.DEFAULT)
                                         BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                                     } catch (e: Exception) {
+                                        e.printStackTrace()
                                         null
                                     }
                                 }
@@ -168,7 +168,7 @@ fun ChatInput(
                     Icon(
                         imageVector = Icons.Default.Psychology,
                         contentDescription = "思考模式",
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 },
                 enabled = !isLoading

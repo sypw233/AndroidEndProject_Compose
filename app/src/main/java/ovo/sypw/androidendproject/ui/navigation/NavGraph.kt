@@ -25,16 +25,18 @@ fun AppNavigation(
     val context = LocalContext.current
 
     // 根据广告偏好决定起始页面
-    // 如果启用 Google 广告，则跳过 SplashScreen（Google Ad 会由 AppOpenAdManager 显示）
-    val startDestination = if (PreferenceUtils.useGoogleAd(context)) {
-        // 使用 Google 广告时，根据是否首次启动决定起始页
-        if (PreferenceUtils.isFirstLaunch(context)) {
-            Screen.Intro.route
-        } else {
-            Screen.Main.route
-        }
+    // 只有在广告启用 (PreferenceUtils.isAdEnabled) 时才显示 Splash 或 Intro
+    val adEnabled = PreferenceUtils.isAdEnabled(context)
+    val useGoogleAd = PreferenceUtils.useGoogleAd(context)
+    
+    val startDestination = if (!adEnabled) {
+        // 广告已关闭，直接进入主页或引导页
+        if (PreferenceUtils.isFirstLaunch(context)) Screen.Intro.route else Screen.Main.route
+    } else if (useGoogleAd) {
+        // Google 广告，也直接进入主页或引导页（广告由 AdMob 在 MainActivity 中管理，覆盖在 Activity 上）
+        if (PreferenceUtils.isFirstLaunch(context)) Screen.Intro.route else Screen.Main.route
     } else {
-        // 使用自定义启动屏
+        // 使用自定义启动屏（只有在开启广告且不使用 Google 广告时显示）
         Screen.Splash.route
     }
 

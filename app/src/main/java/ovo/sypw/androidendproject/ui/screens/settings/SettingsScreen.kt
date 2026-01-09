@@ -59,13 +59,7 @@ fun SettingsScreen(
 
     // 广告设置状态
     var adEnabled by remember {
-        mutableStateOf(
-            PreferenceUtils.getBoolean(
-                context,
-                "ad_enabled",
-                true
-            )
-        )
+        mutableStateOf(PreferenceUtils.isAdEnabled(context))
     }
     var useGoogleAd by remember { mutableStateOf(PreferenceUtils.useGoogleAd(context)) }
 
@@ -133,10 +127,8 @@ fun SettingsScreen(
                 checked = adEnabled,
                 onCheckedChange = { enabled ->
                     adEnabled = enabled
-                    PreferenceUtils.putBoolean(context, "ad_enabled", enabled)
-                    if (!enabled) {
-                        PreferenceUtils.setUseGoogleAd(context, false)
-                    }
+                    PreferenceUtils.setAdEnabled(context, enabled)
+                    // 如果关闭广告，不强制关闭 useGoogleAd，而是让 NavGraph 判断
                 }
             )
 
