@@ -39,9 +39,14 @@ fun BannerCarousel(
     autoScrollDuration: Long = 3000L
 ) {
     if (banners.isEmpty()) return
+    val virtualCount = Int.MAX_VALUE
+    // 2. 初始位置：设在中间，并对齐到实际数据的第 0 位
+    val initialPage = virtualCount / 2 - (virtualCount / 2 % banners.size)
 
-    val pagerState = rememberPagerState(pageCount = { banners.size })
-
+    val pagerState = rememberPagerState(
+        initialPage = initialPage,
+        pageCount = { virtualCount } // 虚拟总页数
+    )
     // 自动轮播
     LaunchedEffect(pagerState) {
         while (true) {
@@ -63,7 +68,7 @@ fun BannerCarousel(
                 .fillMaxSize()
                 .clip(RoundedCornerShape(12.dp))
         ) { page ->
-            val banner = banners[page]
+            val banner = banners[Math.floorMod(page, banners.size)]
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -104,8 +109,9 @@ fun BannerCarousel(
                 .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            val currentActualIndex = Math.floorMod(pagerState.currentPage, banners.size)
             repeat(banners.size) { index ->
-                val color = if (pagerState.currentPage == index)
+                val color = if (currentActualIndex == index)
                     MaterialTheme.colorScheme.primary
                 else
                     Color.White.copy(alpha = 0.5f)
