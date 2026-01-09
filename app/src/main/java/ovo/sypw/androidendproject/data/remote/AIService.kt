@@ -131,7 +131,7 @@ class AIService(private val context: Context) {
                     if (choices != null && choices.length() > 0) {
                         val delta = choices.getJSONObject(0).optJSONObject("delta")
                         val content = delta?.optString("content", "") ?: ""
-                        
+
                         if (content.isNotEmpty()) {
                             fullContent.append(content)
                             emit(StreamResponse.Delta(content, fullContent.toString()))

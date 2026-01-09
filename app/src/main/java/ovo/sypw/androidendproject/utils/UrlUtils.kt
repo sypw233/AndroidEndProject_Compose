@@ -6,7 +6,7 @@ object UrlUtils {
      */
     fun getAppNameFromScheme(url: String): String {
         val scheme = url.substringBefore("://")
-        return  if (scheme.isNotEmpty() && scheme != url) "${scheme}应用" else "外部应用"
+        return if (scheme.isNotEmpty() && scheme != url) "${scheme}应用" else "外部应用"
     }
 
     /**

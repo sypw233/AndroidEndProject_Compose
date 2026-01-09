@@ -122,18 +122,21 @@ fun MainScreen(navController: NavHostController) {
                                     "Android教程"
                                 )
                             )
+
                             "java" -> navController.navigate(
                                 Screen.WebView.createRoute(
                                     "https://www.runoob.com/java/java-tutorial.html",
                                     "Java教程"
                                 )
                             )
+
                             "php" -> navController.navigate(
                                 Screen.WebView.createRoute(
                                     "https://www.runoob.com/php/php-tutorial.html",
                                     "PHP教程"
                                 )
                             )
+
                             "python" -> navController.navigate(Screen.Python.route)
                         }
                     }

@@ -301,39 +301,39 @@ fun LoginScreen(
                         Text(if (isRegisterMode) "已有账号？去登录" else "没有账号？去注册")
                     }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(1.dp)
-                            .padding(end = 8.dp)
-                    )
-                    Text("其他登录方式", style = MaterialTheme.typography.bodySmall)
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(1.dp)
-                            .padding(start = 8.dp)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(1.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text("其他登录方式", style = MaterialTheme.typography.bodySmall)
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(1.dp)
+                                .padding(start = 8.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Google Sign In Button
+                    OutlinedButton(
+                        onClick = {
+                            launchGoogleSignIn(context, googleSignInLauncher)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Assuming you have a google icon in drawable, otherwise use text
+                        // Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = null, modifier = Modifier.size(24.dp))
+                        // Spacer(modifier = Modifier.width(8.dp))
+                        Text("Google 登录")
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Google Sign In Button
-                OutlinedButton(
-                    onClick = {
-                        launchGoogleSignIn(context, googleSignInLauncher)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Assuming you have a google icon in drawable, otherwise use text
-                    // Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = null, modifier = Modifier.size(24.dp))
-                    // Spacer(modifier = Modifier.width(8.dp))
-                    Text("Google 登录")
-                }
-            }
             }
         }
     }

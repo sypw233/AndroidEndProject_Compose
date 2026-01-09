@@ -111,14 +111,14 @@ class NewsRepository(
     private fun getPageData(page: Int, pageSize: Int): NewsListData {
         val total = cachedNews.size
         val fromIndex = (page - 1) * pageSize
-        
+
         if (fromIndex >= total) {
             return NewsListData(emptyList(), emptyList(), false)
         }
-        
+
         val toIndex = minOf(fromIndex + pageSize, total)
         val pageData = cachedNews.subList(fromIndex, toIndex).toList()
-        
+
         return NewsListData(
             banners = if (page == 1) getBannersFromNews(cachedNews) else emptyList(),
             news = pageData,
@@ -178,7 +178,7 @@ class NewsRepository(
             mergeAndSaveNews(parsedNews)
         }
     }
-    
+
     private suspend fun fetchRssData(): List<News> {
         val responseBody = apiService.getRssFeed(RSS_URL)
         val xmlString = responseBody.string()

@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ovo.sypw.androidendproject.data.model.ChatMessage
 import java.text.SimpleDateFormat
@@ -54,7 +53,7 @@ fun ChatMessageBubble(
     modifier: Modifier = Modifier
 ) {
     val isUser = message.role == "user"
-    
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -77,7 +76,7 @@ fun ChatMessageBubble(
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
-        
+
         Column(
             horizontalAlignment = if (isUser) Alignment.End else Alignment.Start,
             modifier = Modifier.widthIn(max = 280.dp)
@@ -85,9 +84,9 @@ fun ChatMessageBubble(
             // 消息气泡
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = if (isUser) 
-                        MaterialTheme.colorScheme.primary 
-                    else 
+                    containerColor = if (isUser)
+                        MaterialTheme.colorScheme.primary
+                    else
                         MaterialTheme.colorScheme.surfaceVariant
                 ),
                 shape = RoundedCornerShape(
@@ -120,24 +119,24 @@ fun ChatMessageBubble(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
-                    
+
                     // 文本内容
                     val displayContent = if (isStreaming && message.content.isEmpty()) {
                         "思考中..."
                     } else {
                         message.content
                     }
-                    
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = displayContent,
-                            color = if (isUser) 
-                                MaterialTheme.colorScheme.onPrimary 
-                            else 
+                            color = if (isUser)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
                                 MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        
+
                         // 流式输出时的光标动画
                         if (isStreaming && !isUser) {
                             val infiniteTransition = rememberInfiniteTransition(label = "cursor")
@@ -159,7 +158,7 @@ fun ChatMessageBubble(
                     }
                 }
             }
-            
+
             // 时间戳
             Text(
                 text = formatTimestamp(message.timestamp),
@@ -168,7 +167,7 @@ fun ChatMessageBubble(
                 modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp)
             )
         }
-        
+
         if (isUser) {
             Spacer(modifier = Modifier.width(8.dp))
             // 用户头像

@@ -42,11 +42,11 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ovo.sypw.androidendproject.utils.formatLargeNumber
 import kotlin.math.roundToInt
 import ovo.sypw.androidendproject.data.model.BarChartData as AppBarChartData
 import ovo.sypw.androidendproject.data.model.LineChartData as AppLineChartData
 import ovo.sypw.androidendproject.data.model.PieChartData as AppPieChartData
-import ovo.sypw.androidendproject.utils.formatLargeNumber
 
 /**
  * 自定义可交互折线图

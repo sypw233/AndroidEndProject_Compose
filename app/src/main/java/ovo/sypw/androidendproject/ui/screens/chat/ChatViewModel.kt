@@ -195,12 +195,12 @@ class ChatViewModel(
                 role = "assistant",
                 content = ""
             )
-            
+
             val conversationWithAiMessage = withContext(Dispatchers.IO) {
                 chatRepository.addMessage(conversation.id, aiMessage)
                 chatRepository.getConversation(conversation.id)
             }
-            
+
             _currentConversation.value = conversationWithAiMessage
 
             var hasReceivedContent = false
@@ -218,6 +218,7 @@ class ChatViewModel(
                         // 节流保存
                         throttleSave(conversation.id, response.fullContent)
                     }
+
                     is StreamResponse.Done -> {
                         _streamingContent.value = ""
                         val finalContent = response.content.ifBlank {
@@ -238,6 +239,7 @@ class ChatViewModel(
                         _currentConversation.value = finalConversation
                         loadConversations()
                     }
+
                     is StreamResponse.Error -> {
                         _errorMessage.value = response.message
                         if (!hasReceivedContent) {
@@ -312,13 +314,13 @@ class ChatViewModel(
             _pendingImageBase64.value = null
             return
         }
-        
+
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val inputStream = imageContext.contentResolver.openInputStream(uri)
                 val bytes = inputStream?.readBytes()
                 inputStream?.close()
-                
+
                 if (bytes != null) {
                     val base64 = aiService.encodeImageToBase64(bytes)
                     withContext(Dispatchers.Main) {

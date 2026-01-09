@@ -41,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
@@ -86,9 +85,9 @@ fun ChatInput(
                 Icon(
                     imageVector = Icons.Default.Image,
                     contentDescription = "添加图片",
-                    tint = if (pendingImageBase64 != null) 
-                        MaterialTheme.colorScheme.primary 
-                    else 
+                    tint = if (pendingImageBase64 != null)
+                        MaterialTheme.colorScheme.primary
+                    else
                         MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -118,7 +117,8 @@ fun ChatInput(
                             Box(modifier = Modifier.padding(start = 8.dp)) {
                                 val bitmap = remember(pendingImageBase64) {
                                     try {
-                                        val bytes = Base64.decode(pendingImageBase64, Base64.DEFAULT)
+                                        val bytes =
+                                            Base64.decode(pendingImageBase64, Base64.DEFAULT)
                                         BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                                     } catch (e: Exception) {
                                         e.printStackTrace()
@@ -164,7 +164,7 @@ fun ChatInput(
             FilterChip(
                 selected = thinkingEnabled,
                 onClick = onThinkingToggle,
-                label = { 
+                label = {
                     Icon(
                         imageVector = Icons.Default.Psychology,
                         contentDescription = "思考模式",

@@ -208,7 +208,11 @@ fun MapScreen(onBack: () -> Unit) {
                         "定位失败: errorCode=${location.errorCode}, errorInfo=${location.errorInfo}"
                     )
                     if (isFirstLocate) {
-                        Toast.makeText(context, "定位失败：${location.errorInfo}", Toast.LENGTH_SHORT)
+                        Toast.makeText(
+                            context,
+                            "定位失败：${location.errorInfo}",
+                            Toast.LENGTH_SHORT
+                        )
                             .show()
                     }
                 }
@@ -415,10 +419,16 @@ fun MapScreen(onBack: () -> Unit) {
                             }
                             // 手动点击定位，强制移动视角
                             if (isLocationReady) {
-                                aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                                aMap.animateCamera(
+                                    CameraUpdateFactory.newLatLngZoom(
+                                        currentLocation,
+                                        15f
+                                    )
+                                )
                                 Toast.makeText(context, "已回到当前位置", Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(context, "正在获取位置...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "正在获取位置...", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         } else {
                             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)

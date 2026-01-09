@@ -117,12 +117,12 @@ fun ChatScreen(
                         ) {
                             availableModels.forEach { model ->
                                 DropdownMenuItem(
-                                    text = { 
+                                    text = {
                                         Text(
                                             text = model,
-                                            color = if (model == currentModel) 
-                                                MaterialTheme.colorScheme.primary 
-                                            else 
+                                            color = if (model == currentModel)
+                                                MaterialTheme.colorScheme.primary
+                                            else
                                                 MaterialTheme.colorScheme.onSurface
                                         )
                                     },
@@ -163,12 +163,12 @@ fun ChatScreen(
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 val messages = conversation?.messages?.asReversed() ?: emptyList()
-                
+
                 items(messages, key = { it.id }) { message ->
-                    val isLastAssistantMessage = messages.firstOrNull()?.id == message.id 
+                    val isLastAssistantMessage = messages.firstOrNull()?.id == message.id
                             && message.role == "assistant"
                     val isStreaming = isLastAssistantMessage && isLoading
-                    
+
                     ChatMessageBubble(
                         message = if (isStreaming && streamingContent.isNotEmpty()) {
                             message.copy(content = streamingContent)

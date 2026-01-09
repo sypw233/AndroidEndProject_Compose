@@ -267,7 +267,7 @@ fun SettingsScreen(
             // AI 设置对话框
             if (showAISettingsDialog) {
                 var expandedModelDropdown by remember { mutableStateOf(false) }
-                
+
                 AlertDialog(
                     onDismissRequest = { showAISettingsDialog = false },
                     title = { Text("AI 设置") },
@@ -291,7 +291,7 @@ fun SettingsScreen(
                                 placeholder = { Text("sk-...") }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            
+
                             // 默认模型下拉选择
                             Text(
                                 text = "默认模型",
@@ -325,7 +325,7 @@ fun SettingsScreen(
                                     }
                                 }
                             }
-                            
+
                             Spacer(modifier = Modifier.height(8.dp))
                             TextButton(
                                 onClick = { showModelListDialog = true }
@@ -355,7 +355,7 @@ fun SettingsScreen(
             // 模型列表管理对话框
             if (showModelListDialog) {
                 var tempModelList by remember { mutableStateOf(modelList.toMutableList()) }
-                
+
                 AlertDialog(
                     onDismissRequest = { showModelListDialog = false },
                     title = { Text("管理模型列表") },
@@ -376,8 +376,12 @@ fun SettingsScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 IconButton(
                                     onClick = {
-                                        if (newModelName.isNotBlank() && !tempModelList.contains(newModelName)) {
-                                            tempModelList = (tempModelList + newModelName).toMutableList()
+                                        if (newModelName.isNotBlank() && !tempModelList.contains(
+                                                newModelName
+                                            )
+                                        ) {
+                                            tempModelList =
+                                                (tempModelList + newModelName).toMutableList()
                                             newModelName = ""
                                         }
                                     }
@@ -385,9 +389,9 @@ fun SettingsScreen(
                                     Icon(Icons.Default.Add, "添加")
                                 }
                             }
-                            
+
                             Spacer(modifier = Modifier.height(8.dp))
-                            
+
                             // 模型列表
                             tempModelList.forEach { model ->
                                 Row(
@@ -403,7 +407,8 @@ fun SettingsScreen(
                                     )
                                     IconButton(
                                         onClick = {
-                                            tempModelList = tempModelList.filter { it != model }.toMutableList()
+                                            tempModelList =
+                                                tempModelList.filter { it != model }.toMutableList()
                                         }
                                     ) {
                                         Icon(

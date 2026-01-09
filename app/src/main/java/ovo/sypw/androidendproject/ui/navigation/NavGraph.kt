@@ -28,7 +28,7 @@ fun AppNavigation(
     // 只有在广告启用 (PreferenceUtils.isAdEnabled) 时才显示 Splash 或 Intro
     val adEnabled = PreferenceUtils.isAdEnabled(context)
     val useGoogleAd = PreferenceUtils.useGoogleAd(context)
-    
+
     val startDestination = if (!adEnabled) {
         // 广告已关闭，直接进入主页或引导页
         if (PreferenceUtils.isFirstLaunch(context)) Screen.Intro.route else Screen.Main.route

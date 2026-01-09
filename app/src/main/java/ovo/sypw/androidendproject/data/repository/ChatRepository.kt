@@ -25,15 +25,15 @@ class ChatRepository(private val context: Context) {
     fun saveConversation(conversation: ChatConversation) {
         val conversations = loadConversations().toMutableList()
         val existingIndex = conversations.indexOfFirst { it.id == conversation.id }
-        
+
         val updatedConversation = conversation.copy(updatedAt = System.currentTimeMillis())
-        
+
         if (existingIndex >= 0) {
             conversations[existingIndex] = updatedConversation
         } else {
             conversations.add(0, updatedConversation)
         }
-        
+
         saveAllConversations(conversations)
     }
 
@@ -84,7 +84,7 @@ class ChatRepository(private val context: Context) {
     fun addMessage(conversationId: String, message: ChatMessage) {
         val conversation = getConversation(conversationId) ?: return
         conversation.messages.add(message)
-        
+
         // 如果是第一条用户消息，更新对话标题
         if (conversation.messages.size == 1 && message.role == "user") {
             val title = message.content.take(20) + if (message.content.length > 20) "..." else ""
@@ -97,10 +97,14 @@ class ChatRepository(private val context: Context) {
     /**
      * 更新对话中的最后一条消息 (用于流式更新)
      */
-    fun updateLastMessage(conversationId: String, content: String, thinkingContent: String? = null) {
+    fun updateLastMessage(
+        conversationId: String,
+        content: String,
+        thinkingContent: String? = null
+    ) {
         val conversation = getConversation(conversationId) ?: return
         if (conversation.messages.isEmpty()) return
-        
+
         val lastIndex = conversation.messages.lastIndex
         val lastMessage = conversation.messages[lastIndex]
         conversation.messages[lastIndex] = lastMessage.copy(
