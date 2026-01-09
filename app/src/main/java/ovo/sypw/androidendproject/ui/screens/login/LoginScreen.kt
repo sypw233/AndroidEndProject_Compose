@@ -67,6 +67,7 @@ fun LoginScreen(
 
     // Email/Password states
     var isRegisterMode by remember { mutableStateOf(false) }
+    var isForgotPasswordMode by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") } // Only used for registration
@@ -109,6 +110,14 @@ fun LoginScreen(
                 viewModel.resetState()
             }
 
+            is LoginUiState.PasswordResetEmailSent -> {
+                Log.d("LoginScreen", "LaunchedEffect: 处理 PasswordResetEmailSent 状态")
+                Toast.makeText(context, "密码重置邮件已发送，请查收邮箱", Toast.LENGTH_LONG)
+                    .show()
+                isForgotPasswordMode = false
+                viewModel.resetState()
+            }
+
             is LoginUiState.Error -> {
                 Log.d(
                     "LoginScreen",
@@ -130,9 +139,23 @@ fun LoginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isRegisterMode) "注册" else "登录") },
+                title = {
+                    Text(
+                        when {
+                            isForgotPasswordMode -> "忘记密码"
+                            isRegisterMode -> "注册"
+                            else -> "登录"
+                        }
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        if (isForgotPasswordMode) {
+                            isForgotPasswordMode = false
+                        } else {
+                            onBack()
+                        }
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 }
@@ -156,80 +179,127 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Input Fields
-            if (isRegisterMode) {
+            // 忘记密码模式
+            if (isForgotPasswordMode) {
+                Text(
+                    text = "输入您的邮箱地址，我们将发送密码重置链接",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
                 OutlinedTextField(
-                    value = displayName,
-                    onValueChange = { displayName = it },
-                    label = { Text("用户名 / 昵称") },
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("电子邮箱") },
                     modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Done
+                    ),
                     singleLine = true
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("电子邮箱") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                singleLine = true
-            )
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("密码") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                trailingIcon = {
-                    val image = if (passwordVisible)
-                        Icons.Filled.Visibility
-                    else
-                        Icons.Filled.VisibilityOff
-
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = null)
+                if (uiState is LoginUiState.Loading) {
+                    CircularProgressIndicator()
+                } else {
+                    Button(
+                        onClick = { viewModel.sendPasswordResetEmail(email) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("发送重置邮件")
                     }
-                },
-                singleLine = true
-            )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            if (uiState is LoginUiState.Loading) {
-                CircularProgressIndicator()
+                    TextButton(onClick = { isForgotPasswordMode = false }) {
+                        Text("返回登录")
+                    }
+                }
             } else {
-                // Email Auth Button
-                Button(
-                    onClick = {
-                        if (isRegisterMode) {
-                            viewModel.signUpWithEmail(email, password, displayName)
-                        } else {
-                            viewModel.signInWithEmail(email, password)
+                // 正常的登录/注册模式
+                // Input Fields
+                if (isRegisterMode) {
+                    OutlinedTextField(
+                        value = displayName,
+                        onValueChange = { displayName = it },
+                        label = { Text("用户名 / 昵称") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("电子邮箱") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("密码") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    trailingIcon = {
+                        val image = if (passwordVisible)
+                            Icons.Filled.Visibility
+                        else
+                            Icons.Filled.VisibilityOff
+
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, contentDescription = null)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(if (isRegisterMode) "注册" else "登录")
-                }
+                    singleLine = true
+                )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // Toggle Mode
-                TextButton(onClick = { isRegisterMode = !isRegisterMode }) {
-                    Text(if (isRegisterMode) "已有账号？去登录" else "没有账号？去注册")
-                }
+                if (uiState is LoginUiState.Loading) {
+                    CircularProgressIndicator()
+                } else {
+                    // Email Auth Button
+                    Button(
+                        onClick = {
+                            if (isRegisterMode) {
+                                viewModel.signUpWithEmail(email, password, displayName)
+                            } else {
+                                viewModel.signInWithEmail(email, password)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (isRegisterMode) "注册" else "登录")
+                    }
+
+                    // 仅在登录模式下显示忘记密码
+                    if (!isRegisterMode) {
+                        TextButton(onClick = { isForgotPasswordMode = true }) {
+                            Text("忘记密码？")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Toggle Mode
+                    TextButton(onClick = { isRegisterMode = !isRegisterMode }) {
+                        Text(if (isRegisterMode) "已有账号？去登录" else "没有账号？去注册")
+                    }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -263,6 +333,7 @@ fun LoginScreen(
                     // Spacer(modifier = Modifier.width(8.dp))
                     Text("Google 登录")
                 }
+            }
             }
         }
     }

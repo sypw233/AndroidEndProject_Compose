@@ -134,4 +134,19 @@ object FirebaseWrapper {
             Result.failure(e)
         }
     }
+
+    /**
+     * 发送密码重置邮件
+     */
+    suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+        Log.d(TAG, "sendPasswordResetEmail: 开始, email=$email")
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Log.d(TAG, "sendPasswordResetEmail: 邮件发送成功")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "sendPasswordResetEmail: 失败", e)
+            Result.failure(e)
+        }
+    }
 }

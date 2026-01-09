@@ -46,4 +46,8 @@ class UserRepository {
     fun getCurrentDisplayName(): String {
         return currentUser?.displayName ?: currentUser?.email?.substringBefore("@") ?: "用户"
     }
+
+    suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+        return FirebaseWrapper.sendPasswordResetEmail(email)
+    }
 }

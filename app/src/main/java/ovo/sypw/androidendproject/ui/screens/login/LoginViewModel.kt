@@ -158,6 +158,31 @@ class LoginViewModel(
         }
     }
 
+    fun sendPasswordResetEmail(email: String) {
+        Log.d(TAG, "sendPasswordResetEmail: 开始, email=$email")
+        if (email.isBlank()) {
+            Log.w(TAG, "sendPasswordResetEmail: 邮箱为空")
+            _uiState.value = LoginUiState.Error("请输入邮箱地址")
+            return
+        }
+
+        viewModelScope.launch {
+            Log.d(TAG, "sendPasswordResetEmail: 设置状态为 Loading")
+            _uiState.value = LoginUiState.Loading
+            val result = userRepository.sendPasswordResetEmail(email)
+            result.fold(
+                onSuccess = {
+                    Log.d(TAG, "sendPasswordResetEmail: 发送成功")
+                    _uiState.value = LoginUiState.PasswordResetEmailSent
+                },
+                onFailure = { e ->
+                    Log.e(TAG, "sendPasswordResetEmail: 失败", e)
+                    _uiState.value = LoginUiState.Error(e.message ?: "发送重置邮件失败")
+                }
+            )
+        }
+    }
+
     fun resetState() {
         Log.d(TAG, "resetState: 重置状态为 Idle")
         _uiState.value = LoginUiState.Idle
